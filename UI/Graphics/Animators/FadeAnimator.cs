@@ -1,45 +1,40 @@
-﻿using Microsoft.Xna.Framework;
-using OAS.UI.Elements;
-using OAS.UI.Screens;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Haruka.MonoGameUtils.UI.Elements;
+using Haruka.MonoGameUtils.UI.Screens;
+using Microsoft.Xna.Framework;
 
-namespace OAS.UI.Graphics.Animators {
-    public class FadeAnimator : IAnimator {
+namespace Haruka.MonoGameUtils.UI.Graphics.Animators;
 
-        private readonly UIElement element;
-        private readonly IAlphaable alpha;
-        private int delay;
-        private int length;
+public class FadeAnimator : IAnimator {
 
-        private double time;
+    private readonly UIElement element;
+    private readonly IAlphaable alpha;
+    private readonly int delay;
+    private readonly int length;
 
-        public FadeAnimator(UIElement element, IAlphaable alpha, int delay, int length) {
-            this.element = element;
-            this.alpha = alpha;
-            this.delay = delay;
-            this.length = length;
-        }
+    private double time;
 
-        public bool Paused { get; set; }
+    public FadeAnimator(UIElement element, IAlphaable alpha, int delay, int length) {
+        this.element = element;
+        this.alpha = alpha;
+        this.delay = delay;
+        this.length = length;
+    }
 
-        public void Update(Screen screen, GameTime gameTime) {
-            if (!Paused) {
-                time += gameTime.ElapsedGameTime.TotalMilliseconds;
-                if (time > delay) {
-                    float alpha = 1F - (float)((time - delay) / length);
-                    if (alpha > 0) {
-                        this.alpha.Alpha = alpha;
-                    } else {
-                        element.Visible = false;
-                        Paused = true;
-                    }
+    public bool Paused { get; set; }
+
+    public void Update(Screen screen, GameTime gameTime) {
+        if (!Paused) {
+            time += gameTime.ElapsedGameTime.TotalMilliseconds;
+            if (time > delay) {
+                float alpha = 1F - (float)((time - delay) / length);
+                if (alpha > 0) {
+                    this.alpha.Alpha = alpha;
+                } else {
+                    element.Visible = false;
+                    Paused = true;
                 }
             }
         }
-
     }
+
 }

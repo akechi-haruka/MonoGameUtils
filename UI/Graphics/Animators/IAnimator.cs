@@ -1,18 +1,12 @@
-﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using OAS.UI.Screens;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Haruka.MonoGameUtils.UI.Screens;
+using Microsoft.Xna.Framework;
 
-namespace OAS.UI.Graphics.Animators {
-    public interface IAnimator {
+namespace Haruka.MonoGameUtils.UI.Graphics.Animators;
 
-        public bool Paused { get; set; }
+public interface IAnimator {
 
-        public void Update(Screen screen, GameTime gameTime);
+    public bool Paused { get; set; }
 
-    }
+    public void Update(Screen screen, GameTime gameTime);
+
 }

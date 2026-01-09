@@ -1,60 +1,54 @@
-﻿using Microsoft.Xna.Framework;
+﻿using Haruka.MonoGameUtils.Input;
+using Haruka.MonoGameUtils.UI.Graphics;
+using Haruka.MonoGameUtils.UI.Graphics.Animators;
+using Haruka.MonoGameUtils.UI.Screens;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using OAS.Input;
-using OAS.UI.Graphics;
-using OAS.UI.Graphics.Animators;
-using OAS.UI.Resources;
-using OAS.UI.Screens;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace OAS.UI.Elements {
-    public class ElementTimer : ElementBorderedRectangle {
+namespace Haruka.MonoGameUtils.UI.Elements;
 
-        private const int WIDTH = 320;
+public class ElementTimer : ElementBorderedRectangle {
 
-        private TimeSpan time;
-        private TimeSpan lowTime = TimeSpan.FromSeconds(10);
-        private TimeSpan soundTime = TimeSpan.FromSeconds(5);
-        private Action onExpire;
+    private const int WIDTH = 320;
 
-        public bool Paused { get; set; }
+    private TimeSpan time;
+    private readonly TimeSpan lowTime = TimeSpan.FromSeconds(10);
+    private readonly TimeSpan soundTime = TimeSpan.FromSeconds(5);
+    private readonly Action onExpire;
 
-        public ElementTimer(int time, Action onExpire) : base(Screen.TOP_RIGHT.X - WIDTH, Screen.TOP_RIGHT.Y + 60, WIDTH, Program.Main.Skin.DefaultFontHeight, Color.Black, Color.White) {
-            this.time = TimeSpan.FromSeconds(time);
-            this.onExpire = onExpire;
-        }
+    public bool Paused { get; set; }
 
-        protected override void DrawElement(GameTime gameTime, SpriteBatch spriteBatch) {
-            base.DrawElement(gameTime, spriteBatch);
-            spriteBatch.DrawString("TIME REMAIN: " + ((int)time.TotalSeconds).ToString("D2"), X+10, Y);
-        }
+    public ElementTimer(int time, Action onExpire) : base(Screen.TopRight.X - WIDTH, Screen.TopRight.Y + 60, WIDTH, ExtendedGame.Instance.Skin.DefaultFontHeight, Color.Black, Color.White) {
+        this.time = TimeSpan.FromSeconds(time);
+        this.onExpire = onExpire;
+    }
 
-        protected override void UpdateElement(Program game, InputManager inputManager, Screen screen, GameTime gameTime) {
-            base.UpdateElement(game, inputManager, screen, gameTime);
-            if (!Paused) {
-                int ps = time.Seconds;
-                time -= gameTime.ElapsedGameTime;
-                if (time.Seconds != ps) {
-                    if (time <= lowTime && Animators.Count == 0) {
-                        AddAnimator(new GradientAnimator(this, Color.Black, Color.Red, 500));
-                    }
-                    if (time <= soundTime) {
-                        game.PlaySound("Sound/TimerLowTick");
-                    }
-                    if (time <= TimeSpan.Zero) {
-                        Paused = true;
-                        game.QueueOnLogicThread(onExpire);
-                    }
+    protected override void DrawElement(GameTime gameTime, SpriteBatch spriteBatch) {
+        base.DrawElement(gameTime, spriteBatch);
+        spriteBatch.DrawString("TIME REMAIN: " + ((int)time.TotalSeconds).ToString("D2"), X+10, Y);
+    }
+
+    protected override void UpdateElement(ExtendedGame game, InputManager inputManager, Screen screen, GameTime gameTime) {
+        base.UpdateElement(game, inputManager, screen, gameTime);
+        if (!Paused) {
+            int ps = time.Seconds;
+            time -= gameTime.ElapsedGameTime;
+            if (time.Seconds != ps) {
+                if (time <= lowTime && Animators.Count == 0) {
+                    AddAnimator(new GradientAnimator(this, Color.Black, Color.Red, 500));
+                }
+                if (time <= soundTime) {
+                    game.PlaySound("Sound/TimerLowTick");
+                }
+                if (time <= TimeSpan.Zero) {
+                    Paused = true;
+                    game.QueueOnLogicThread(onExpire);
                 }
             }
         }
+    }
 
-        internal void SetPaused(bool v) {
-            Paused = v;
-        }
+    internal void SetPaused(bool v) {
+        Paused = v;
     }
 }

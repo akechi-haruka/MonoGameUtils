@@ -1,14 +1,7 @@
-﻿using Microsoft.Xna.Framework;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace Haruka.MonoGameUtils.UI.Graphics;
 
-namespace OAS.UI.Graphics {
-    public interface IAlphaable {
+public interface IAlphaable {
 
-        public float Alpha { get; set; }
+    public float Alpha { get; set; }
 
-    }
 }

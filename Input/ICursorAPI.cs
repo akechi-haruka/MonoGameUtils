@@ -1,31 +1,26 @@
 ﻿using Microsoft.Xna.Framework;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace OAS.Input {
-    public interface ICursorAPI : IInputAPI {
-        public int GetX();
+namespace Haruka.MonoGameUtils.Input;
 
-        public int GetY();
+public interface ICursorAPI : IInputAPI {
+    public int GetX();
 
-        public bool HasPositionJustChanged();
+    public int GetY();
 
-        public bool IsPressed();
+    public bool HasPositionJustChanged();
 
-        public bool IsDragging();
+    public bool IsPressed();
 
-        public bool IsJustPressed();
+    public bool IsDragging();
 
-        public bool IsJustReleased();
+    public bool IsJustPressed();
 
-        public Point[] GetPoints();
+    public bool IsJustReleased();
+
+    public Point[] GetPoints();
         
-        public Vector2 GetDragDistance();
+    public Vector2 GetDragDistance();
 
-        public bool IsInClickOrigin();
+    public bool IsInClickOrigin();
 
-    }
 }

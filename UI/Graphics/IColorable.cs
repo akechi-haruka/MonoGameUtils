@@ -1,14 +1,9 @@
 ﻿using Microsoft.Xna.Framework;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace OAS.UI.Graphics {
-    public interface IColorable {
+namespace Haruka.MonoGameUtils.UI.Graphics;
 
-        public Color Color { get; set; }
+public interface IColorable {
 
-    }
+    public Color Color { get; set; }
+
 }

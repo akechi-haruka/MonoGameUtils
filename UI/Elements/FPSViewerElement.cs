@@ -1,61 +1,55 @@
-﻿using Microsoft.Xna.Framework;
+﻿using Haruka.MonoGameUtils.Input;
+using Haruka.MonoGameUtils.UI.Screens;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using OAS.Input;
-using OAS.UI.Resources;
-using OAS.UI.Screens;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace OAS.UI.Elements {
-    public class FPSViewerElement : UIElement {
+namespace Haruka.MonoGameUtils.UI.Elements;
 
-        public const int W = 120;
-        public const int H = 80;
+public class FPSViewerElement : UIElement {
 
-        private ElementText text;
+    public const int W = 120;
+    public const int H = 80;
 
-        public FPSViewerElement() : base(0, 0) {
-            Children.Add(new ElementRectangle(GetX(), GetY(), W, H, Color.Gray, true));
-            Children.Add(new ElementRectangle(GetX(), GetY(), W, H, Color.White) {
-                BorderSize = 5
-            });
-            text = new ElementText("FPS: ---\nFT: ---", 10, 10) {
-                Font = game.Skin.CJKFontSmall,
-                Color = Color.White
-            };
-            Children.Add(text);
-        }
+    private readonly ElementText text;
 
-        public override int GetHeight() {
-            return H;
-        }
+    public FPSViewerElement() : base(0, 0) {
+        Children.Add(new ElementRectangle(GetX(), GetY(), W, H, Color.Gray, true));
+        Children.Add(new ElementRectangle(GetX(), GetY(), W, H, Color.White) {
+            BorderSize = 5
+        });
+        text = new ElementText("FPS: ---\nFT: ---", 10, 10) {
+            Font = Game.Skin.DefaultFontSmall,
+            Color = Color.White
+        };
+        Children.Add(text);
+    }
 
-        public override Rectangle GetRect() {
-            throw new NotImplementedException();
-        }
+    public override int GetHeight() {
+        return H;
+    }
 
-        public override int GetWidth() {
-            return W;
-        }
+    public override Rectangle GetRect() {
+        throw new NotImplementedException();
+    }
 
-        public override void SetHeight(int height) {
-            throw new NotImplementedException();
-        }
+    public override int GetWidth() {
+        return W;
+    }
 
-        public override void SetWidth(int width) {
-            throw new NotImplementedException();
-        }
+    public override void SetHeight(int height) {
+        throw new NotImplementedException();
+    }
 
-        protected override void DrawElement(GameTime gameTime, SpriteBatch spriteBatch) {
-        }
+    public override void SetWidth(int w) {
+        throw new NotImplementedException();
+    }
 
-        protected override void UpdateElement(Program game, InputManager inputManager, Screen screen, GameTime gameTime) {
-            double ft = 1000D / game.Framerate;
+    protected override void DrawElement(GameTime gameTime, SpriteBatch spriteBatch) {
+    }
 
-            text.UpdateTextDirect("FPS: " + game.Framerate.ToString("N1") + "\nT: " + (ft < 1000 ? ft.ToString("N1") : "---")+"ms\nLS: " + game.lastSecond.Second);
-        }
+    protected override void UpdateElement(ExtendedGame game, InputManager inputManager, Screen screen, GameTime gameTime) {
+        double ft = 1000D / game.Framerate;
+
+        text.UpdateTextDirect("FPS: " + game.Framerate.ToString("N1") + "\nT: " + (ft < 1000 ? ft.ToString("N1") : "---")+"ms\nLS: " + game.LastSecond.Second);
     }
 }

@@ -1,23 +1,16 @@
 ﻿using Microsoft.Xna.Framework;
-using OAS.Error;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace OAS.Input {
-    
-    public interface IInputAPI {
+namespace Haruka.MonoGameUtils.Input;
 
-        public void EarlyUpdate(GameTime time);
+public interface IInputAPI {
 
-        public void LateUpdate(GameTime time);
+    public void EarlyUpdate(GameTime time);
+
+    public void LateUpdate(GameTime time);
         
-        public void Initialize(bool isErrorDisp);
+    public void Initialize();
 
-        public Exception GetError();
-        public DateTime? GetErrorTime();
-        public void ResetError();
-    }
+    public Exception GetError();
+    public DateTime? GetErrorTime();
+    public void ResetError();
 }

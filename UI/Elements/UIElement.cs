@@ -1,92 +1,97 @@
-﻿using Microsoft.Xna.Framework;
+﻿using Haruka.MonoGameUtils.Input;
+using Haruka.MonoGameUtils.UI.Graphics.Animators;
+using Haruka.MonoGameUtils.UI.Screens;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using OAS.Input;
-using OAS.UI.Graphics.Animators;
-using OAS.UI.Screens;
-using System.Collections.Generic;
 
-namespace OAS.UI.Elements {
+namespace Haruka.MonoGameUtils.UI.Elements;
 
-    public abstract class UIElement {
+public abstract class UIElement {
+    public Vector2 Position { get; private set; }
 
-        public Vector2 Position { get; private set; }
-        public float X => Position.X;
-        public float Y => Position.Y;
-        public bool Visible { get; set; }
-        public bool DestroyWhenInvisible { get; set; }
-        protected List<IAnimator> Animators { get; set; } = new List<IAnimator>();
-        protected List<UIElement> Children { get; set; } = new List<UIElement>();
-        protected Program game;
+    public float X {
+        get { return Position.X; }
+    }
 
-        protected UIElement(int x, int y) {
-            game = Program.Main;
-            Position = new Vector2(x, y);
-            Visible = true;
-        }
+    public float Y {
+        get { return Position.Y; }
+    }
 
-        public abstract int GetWidth();
+    public bool Visible { get; set; }
+    public bool DestroyWhenInvisible { get; set; }
+    protected List<IAnimator> Animators { get; set; } = new List<IAnimator>();
+    protected List<UIElement> Children { get; set; } = new List<UIElement>();
+    protected readonly ExtendedGame Game;
 
-        public abstract int GetHeight();
+    protected UIElement(int x, int y) {
+        Game = ExtendedGame.Instance;
+        Position = new Vector2(x, y);
+        Visible = true;
+    }
 
-        public void Draw(GameTime gameTime, SpriteBatch spriteBatch) {
-            DrawElement(gameTime, spriteBatch);
-            foreach (UIElement child in Children) {
-                if (child.Visible) {
-                    child.Draw(gameTime, spriteBatch);
-                }
+    public abstract int GetWidth();
+
+    public abstract int GetHeight();
+
+    public void Draw(GameTime gameTime, SpriteBatch spriteBatch) {
+        DrawElement(gameTime, spriteBatch);
+        foreach (UIElement child in Children) {
+            if (child.Visible) {
+                child.Draw(gameTime, spriteBatch);
             }
         }
+    }
 
-        protected abstract void DrawElement(GameTime gameTime, SpriteBatch spriteBatch);
+    protected abstract void DrawElement(GameTime gameTime, SpriteBatch spriteBatch);
 
-        public void Update(Screen screen, GameTime gameTime) {
-            foreach (IAnimator animator in Animators) {
-                animator.Update(screen, gameTime);
-            }
-            UpdateElement(game, game.InputManager, screen, gameTime);
-            foreach (UIElement child in Children) {
-                child.Update(screen, gameTime);
-            }
+    public void Update(Screen screen, GameTime gameTime) {
+        foreach (IAnimator animator in Animators) {
+            animator.Update(screen, gameTime);
         }
 
-        protected abstract void UpdateElement(Program game, InputManager inputManager, Screen screen, GameTime gameTime);
-
-        public abstract void SetWidth(int width);
-
-        public abstract void SetHeight(int height);
-
-        public abstract Rectangle GetRect();
-
-        public int GetX() {
-            return (int)X;
+        UpdateElement(Game, Game.InputManager, screen, gameTime);
+        foreach (UIElement child in Children) {
+            child.Update(screen, gameTime);
         }
+    }
 
-        public int GetY() {
-            return (int)Y;
-        }
+    protected abstract void UpdateElement(ExtendedGame game, InputManager inputManager, Screen screen, GameTime gameTime);
 
-        public virtual void SetPosition(Vector2 position) {
-            Position = position;
-        }
+    public abstract void SetWidth(int w);
 
-        public void SetPosition(Point position, int xoff = 0, int yoff = 0) {
-            SetPosition(new Vector2(position.X + xoff, position.Y + yoff));
-        }
+    public abstract void SetHeight(int height);
 
-        public void AddAnimator(IAnimator animator) {
-            Animators.Add(animator);
-        }
+    public abstract Rectangle GetRect();
 
-        public void RemoveAnimator(IAnimator animator) {
-            Animators.Remove(animator);
-        }
+    public int GetX() {
+        return (int)X;
+    }
 
-        public void RemoveAllAnimators() {
-            Animators.Clear();
-        }
+    public int GetY() {
+        return (int)Y;
+    }
 
-        protected void AddChild(UIElement child) {
-            Children.Add(child);
-        }
+    public virtual void SetPosition(Vector2 position) {
+        Position = position;
+    }
+
+    public void SetPosition(Point position, int xoff = 0, int yoff = 0) {
+        SetPosition(new Vector2(position.X + xoff, position.Y + yoff));
+    }
+
+    public void AddAnimator(IAnimator animator) {
+        Animators.Add(animator);
+    }
+
+    public void RemoveAnimator(IAnimator animator) {
+        Animators.Remove(animator);
+    }
+
+    public void RemoveAllAnimators() {
+        Animators.Clear();
+    }
+
+    protected void AddChild(UIElement child) {
+        Children.Add(child);
     }
 }

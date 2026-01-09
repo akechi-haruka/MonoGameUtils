@@ -1,31 +1,26 @@
-﻿using Microsoft.Xna.Framework;
-using OAS.UI.Elements;
-using OAS.UI.Screens;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Haruka.MonoGameUtils.UI.Elements;
+using Haruka.MonoGameUtils.UI.Screens;
+using Microsoft.Xna.Framework;
 
-namespace OAS.UI.Graphics.Animators {
-    public class RotateAnimator : IAnimator {
+namespace Haruka.MonoGameUtils.UI.Graphics.Animators;
 
-        private readonly Element2D element;
+public class RotateAnimator : IAnimator {
 
-        private int speed;
+    private readonly Element2D element;
 
-        public RotateAnimator(Element2D element, int speed) {
-            this.element = element;
-            this.speed = speed;
-        }
+    private readonly int speed;
 
-        public bool Paused { get; set; }
-
-        public void Update(Screen screen, GameTime gameTime) {
-            if (!Paused) {
-                element.Rotation += (float)(gameTime.ElapsedGameTime.TotalMilliseconds * speed / 360F);
-            }
-        }
-
+    public RotateAnimator(Element2D element, int speed) {
+        this.element = element;
+        this.speed = speed;
     }
+
+    public bool Paused { get; set; }
+
+    public void Update(Screen screen, GameTime gameTime) {
+        if (!Paused) {
+            element.Rotation += (float)(gameTime.ElapsedGameTime.TotalMilliseconds * speed / 360F);
+        }
+    }
+
 }

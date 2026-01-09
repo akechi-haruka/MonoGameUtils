@@ -1,12 +1,12 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace OAS.UI.Screens {
-    public class EmptyScreen : Screen {
-        protected override void DrawScreen(GameTime gameTime, SpriteBatch spriteBatch) {
-        }
+namespace Haruka.MonoGameUtils.UI.Screens;
 
-        protected override void UpdateScreen(GameTime gameTime) {
-        }
+public class EmptyScreen : Screen {
+    protected override void DrawScreen(GameTime gameTime, SpriteBatch spriteBatch) {
+    }
+
+    protected override void UpdateScreen(GameTime gameTime) {
     }
 }

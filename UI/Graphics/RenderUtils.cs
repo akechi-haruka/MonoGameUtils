@@ -1,64 +1,59 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System.Text;
+using Microsoft.Extensions.Logging;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-using OAS.Util.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+namespace Haruka.MonoGameUtils.UI.Graphics;
 
-namespace OAS.UI.Graphics {
-    public class RenderUtils {
-        
-        public static String WrapText(SpriteFont Font, String Text, int maxWidth = -1, int maxLines = 99) {
-            Log.Write("Wrap Text: " + maxWidth + "px, " + maxLines, "Debug");
-            if (maxWidth < 0) {
-                maxWidth = Program.Main.Width;
-            }
-            if (Font.MeasureString(Text).X < maxWidth) {
-                //return Text;
-            }
+public class RenderUtils {
+    public static string WrapText(SpriteFont font, string text, int maxWidth = -1, int maxLines = 99) {
+        ExtendedGame.ResourceLog.LogDebug("Wrap Text: " + maxWidth + "px, " + maxLines);
+        if (maxWidth < 0) {
+            maxWidth = ExtendedGame.Instance.Width;
+        }
 
-            string[] words = Text.Split(' ');
-            StringBuilder wrappedText = new StringBuilder();
-            float linewidth = 0f;
-            float spaceWidth = Font.MeasureString(" ").X;
-            int lines = 1;
-            for (int i = 0; i < words.Length; ++i) {
-                string word = words[i];
-                Vector2 size = Font.MeasureString(word);
-                if (linewidth + size.X < maxWidth) {
-                    if (word.Contains('\n')) {
-                        if (++lines > maxLines) {
-                            wrappedText.Append(word.Substring(0, word.IndexOf("\n")));
-                            wrappedText.Append("...");
-                            break;
-                        } else {
-                            linewidth = size.X + spaceWidth;
-                        }
-                    } else {
-                        linewidth += size.X + spaceWidth;
-                    }
-                } else {
-                    lines += 2;
-                    if (lines > maxLines) {
+        if (font.MeasureString(text).X < maxWidth) {
+            //return Text;
+        }
+
+        string[] words = text.Split(' ');
+        StringBuilder wrappedText = new StringBuilder();
+        float linewidth = 0f;
+        float spaceWidth = font.MeasureString(" ").X;
+        int lines = 1;
+        foreach (string word in words) {
+            Vector2 size = font.MeasureString(word);
+            if (linewidth + size.X < maxWidth) {
+                if (word.Contains('\n')) {
+                    if (++lines > maxLines) {
+                        wrappedText.Append(word.Substring(0, word.IndexOf('\n')));
                         wrappedText.Append("...");
                         break;
                     } else {
-                        wrappedText.Append('\n');
                         linewidth = size.X + spaceWidth;
                     }
+                } else {
+                    linewidth += size.X + spaceWidth;
                 }
-                wrappedText.Append(word);
-                wrappedText.Append(' ');
+            } else {
+                lines += 2;
+                if (lines > maxLines) {
+                    wrappedText.Append("...");
+                    break;
+                } else {
+                    wrappedText.Append('\n');
+                    linewidth = size.X + spaceWidth;
+                }
             }
 
-            return wrappedText.ToString();
+            wrappedText.Append(word);
+            wrappedText.Append(' ');
         }
 
-        public static int CalculateTextLines(int height, int fontSize) {
-            return height / fontSize;
-        }
+        return wrappedText.ToString();
+    }
+
+    public static int CalculateTextLines(int height, int fontSize) {
+        return height / fontSize;
     }
 }
