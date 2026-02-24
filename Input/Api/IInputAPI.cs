@@ -10,7 +10,7 @@ public interface IInputAPI {
         
     public void Initialize();
 
-    public void Start();
+    internal void Start();
 
-    public void Stop();
+    internal void Stop();
 }

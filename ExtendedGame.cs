@@ -1,3 +1,4 @@
+using Haruka.Common;
 using Haruka.Common.Configuration;
 using Haruka.MonoGameUtils.Input;
 using Haruka.MonoGameUtils.Input.Api;
@@ -29,7 +30,7 @@ public abstract class ExtendedGame : Game {
     public Screen DrawScreen { get; private set; }
     public int Width { get; private set; }
     public int Height { get; private set; }
-    public bool Running { get; }
+    public bool Running { get; private set; }
     public double Framerate { get; protected set; }
     public Skin Skin { get; set; } = new Skin.NullSkin();
     public InputManager InputManager { get; }
@@ -47,11 +48,12 @@ public abstract class ExtendedGame : Game {
 
     private int framesThisSecond = 1;
     private string currentMusic;
+    private readonly ManualResetEvent gameExitWaiter = new ManualResetEvent(false);
 
     protected ExtendedGame(IniFile config, string windowTitle, int width = 0, int height = 0, bool borderless = false, params IInputAPI[] customInputs) {
         Instance = this;
         Configuration = config;
-        ResourceLog = Common.Log.GetOrCreate("Rsrc");
+        ResourceLog = Log.GetOrCreate("Rsrc");
 
         graphics = new GraphicsDeviceManager(this) {
             IsFullScreen = false,
@@ -70,9 +72,10 @@ public abstract class ExtendedGame : Game {
 
         SetResolutionFull(Width, Height, borderless);
         UpdateAnchors();
-        Common.Log.Main.LogDebug("Graphics window created");
+        Log.Main.LogDebug("Graphics window created");
 
         InputManager = new InputManager(Configuration, customInputs);
+        InputManager.StartAllInputs();
 
         Overlay = new EmptyScreen();
 
@@ -87,6 +90,7 @@ public abstract class ExtendedGame : Game {
         Window.TextInput += Window_TextInput;
         Deactivated += ExtendedGame_Deactivated;
         Activated += ExtendedGame_Activated;
+        Exiting += ExtendedGame_Exiting;
 
         Content.RootDirectory = Directory.Exists("../Content") ? Path.GetFullPath("..\\Content") : "Content";
 
@@ -94,6 +98,7 @@ public abstract class ExtendedGame : Game {
             Name = "Watchdog"
         }.Start();
     }
+
 
     protected override void LoadContent() {
         Window.ClientSizeChanged += Window_ClientSizeChanged;
@@ -129,9 +134,9 @@ public abstract class ExtendedGame : Game {
         if (resourceCache.TryGetValue(path, out object value)) {
             ResourceLog.LogTrace("Loading from cache: " + path);
             return (T)value;
-        } else {
-            ResourceLog.LogDebug("Loading: " + path);
         }
+
+        ResourceLog.LogDebug("Loading: " + path);
 
         CheckEvilThreads();
 
@@ -298,7 +303,7 @@ public abstract class ExtendedGame : Game {
     #region Window Management
 
     public void SetResolutionFull(int w, int h, bool borderless = false, bool exclusiveFullscreen = false) {
-        Common.Log.Main.LogInformation("Setting resolution to " + w + "x" + h);
+        Log.Main.LogInformation("Setting resolution to " + w + "x" + h);
         SetExclusiveFullscreen(exclusiveFullscreen);
         SetBorderless(borderless);
         SetWindowSize(w, h, false);
@@ -307,7 +312,7 @@ public abstract class ExtendedGame : Game {
     }
 
     public void SetWindowSize(int width, int height, bool immediatelyApply = true) {
-        Common.Log.Main.LogInformation("Setting window size to " + width + "x" + height);
+        Log.Main.LogInformation("Setting window size to " + width + "x" + height);
         if (width > 0 && height > 0) {
             SetRenderSize(width, height);
             if (immediatelyApply) {
@@ -317,12 +322,12 @@ public abstract class ExtendedGame : Game {
     }
 
     public void SetExclusiveFullscreen(bool exclusiveFullscreen) {
-        Common.Log.Main.LogInformation("Setting exclusive fullscreen to " + exclusiveFullscreen);
+        Log.Main.LogInformation("Setting exclusive fullscreen to " + exclusiveFullscreen);
         graphics.HardwareModeSwitch = exclusiveFullscreen;
     }
 
     public void SetRenderSize(int width, int height) {
-        Common.Log.Main.LogInformation("Setting render size to " + width + "x" + height);
+        Log.Main.LogInformation("Setting render size to " + width + "x" + height);
         if (width > 0 && height > 0) {
             Width = graphics.PreferredBackBufferWidth = width;
             Height = graphics.PreferredBackBufferHeight = height;
@@ -330,7 +335,7 @@ public abstract class ExtendedGame : Game {
     }
 
     public void SetBorderless(bool borderless) {
-        Common.Log.Main.LogInformation("Setting borderless mode to " + borderless);
+        Log.Main.LogInformation("Setting borderless mode to " + borderless);
         Window.IsBorderless = borderless;
         if (borderless) {
             SetWindowPosition(new Point(0, 0));
@@ -342,17 +347,17 @@ public abstract class ExtendedGame : Game {
     }
 
     public void SetWindowPosition(Point position) {
-        Common.Log.Main.LogInformation("Setting window position to x=" + position.X + "/y=" + position.Y);
+        Log.Main.LogInformation("Setting window position to x=" + position.X + "/y=" + position.Y);
         Window.Position = position;
     }
 
     public void ApplyWindowChanges() {
-        Common.Log.Main.LogInformation("Applying graphic changes");
+        Log.Main.LogInformation("Applying graphic changes");
         graphics.ApplyChanges();
     }
 
     public void RecreateRenderPositions() {
-        Common.Log.Main.LogInformation("Re-calculating rendering positions");
+        Log.Main.LogInformation("Re-calculating rendering positions");
         UpdateAnchors();
         QueueOnLogicThread(() => {
             CurrentScreen?.OnGameResized();
@@ -362,10 +367,10 @@ public abstract class ExtendedGame : Game {
 
     public void SetFPS(int val) {
         if (val <= 0) {
-            Common.Log.Main.LogInformation("Setting FPS limit to infinite");
+            Log.Main.LogInformation("Setting FPS limit to infinite");
             IsFixedTimeStep = false;
         } else {
-            Common.Log.Main.LogInformation("Setting FPS limit to " + val);
+            Log.Main.LogInformation("Setting FPS limit to " + val);
             IsFixedTimeStep = true;
             TargetElapsedTime = TimeSpan.FromSeconds(1D / val);
         }
@@ -374,7 +379,7 @@ public abstract class ExtendedGame : Game {
     private void Window_ClientSizeChanged(object sender, EventArgs e) {
         int w = Window.ClientBounds.Width;
         int h = Window.ClientBounds.Height;
-        Common.Log.Main.LogInformation("Window resized to " + w + "x" + h);
+        Log.Main.LogInformation("Window resized to " + w + "x" + h);
         SetRenderSize(w, h);
         ApplyWindowChanges();
         RecreateRenderPositions();
@@ -404,22 +409,28 @@ public abstract class ExtendedGame : Game {
 
     private void LogPerformance() {
         do {
-            if (Framerate < 50) {
-                Common.Log.Main.LogWarning("Low FPS reported: " + Framerate.ToString("N1"));
+            if (Framerate < 45) {
+                Log.Main.LogWarning("Low FPS reported: " + Framerate.ToString("N1"));
             }
 
-            Thread.Sleep(1000);
+            gameExitWaiter.WaitOne(10000);
         } while (Running);
     }
 
     private void ExtendedGame_Activated(object sender, EventArgs e) {
-        Common.Log.Main.LogInformation("Got focus");
+        Log.Main.LogInformation("Got focus");
         InputManager.IsFocused = true;
     }
 
     private void ExtendedGame_Deactivated(object sender, EventArgs e) {
-        Common.Log.Main.LogInformation("Lost focus!");
+        Log.Main.LogInformation("Lost focus!");
         InputManager.IsFocused = false;
+    }
+    
+    private void ExtendedGame_Exiting(object sender, ExitingEventArgs e) {
+        Log.Main.LogInformation("Exit event received!");
+        Running = false;
+        gameExitWaiter.Set();
     }
 
     private void Window_TextInput(object sender, TextInputEventArgs e) {
@@ -511,9 +522,9 @@ public abstract class ExtendedGame : Game {
             return;
         }
 
-        Common.Log.Main.LogInformation("Moving to: " + next?.GetType());
+        Log.Main.LogInformation("Moving to: " + next?.GetType());
         if (CurrentScreen != null) {
-            Common.Log.Main.LogInformation("Closing: " + CurrentScreen.GetType());
+            Log.Main.LogInformation("Closing: " + CurrentScreen.GetType());
             CurrentScreen.CloseScreen();
         }
 
@@ -521,11 +532,11 @@ public abstract class ExtendedGame : Game {
 
         CurrentScreen = next;
         if (CurrentScreen != null) {
-            Common.Log.Main.LogInformation("Opening: " + CurrentScreen.GetType());
+            Log.Main.LogInformation("Opening: " + CurrentScreen.GetType());
             CurrentScreen.ResetScreenElements();
             CurrentScreen.OpenScreen(CurrentScreen.IgnoreOnScreenStack ? prev?.PreviousScreen : prev);
         } else {
-            Common.Log.Main.LogError("Now loading a null screen!");
+            Log.Main.LogError("Now loading a null screen!");
         }
 
         lock (drawScreenLock) {
@@ -539,17 +550,17 @@ public abstract class ExtendedGame : Game {
             return;
         }
 
-        Common.Log.Main.LogInformation("Overlay moving to: " + next?.GetType());
+        Log.Main.LogInformation("Overlay moving to: " + next?.GetType());
         if (Overlay != null) {
-            Common.Log.Main.LogInformation("Overlay closing: " + Overlay.GetType());
+            Log.Main.LogInformation("Overlay closing: " + Overlay.GetType());
             Overlay.CloseScreen();
         }
 
         if (next != null) {
-            Common.Log.Main.LogInformation("Overlay opening: " + next.GetType());
+            Log.Main.LogInformation("Overlay opening: " + next.GetType());
             next.OpenScreen(null);
         } else {
-            Common.Log.Main.LogError("Now loading a null overlay!");
+            Log.Main.LogError("Now loading a null overlay!");
         }
 
         lock (drawScreenLock) {

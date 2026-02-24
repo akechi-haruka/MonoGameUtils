@@ -49,8 +49,6 @@ public class InputManager {
 
     private void InitializeInput(IniFile configuration, IInputAPI input) {
         input.Initialize();
-
-        // TODO: input.start?
         
         if (input is ButtonInputAPI buttoninput) {
             foreach (Key key in Inputs.ALL_KEYS) {
@@ -244,5 +242,17 @@ public class InputManager {
 
     public InputInstance[] GetInputs() {
         return inputs.ToArray();
+    }
+
+    public void StartAllInputs() {
+        foreach (InputInstance input in inputs) {
+            try {
+                input.Reset();
+            } catch (InputException ex) {
+                input.SetError(ex.Message, ex.InnerException);
+            } catch (Exception ex) {
+                input.SetError("Internal Error", ex);
+            }
+        }
     }
 }
