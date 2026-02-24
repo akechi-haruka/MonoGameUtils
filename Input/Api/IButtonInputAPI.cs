@@ -1,14 +1,16 @@
 ﻿using Haruka.Common.Configuration;
 using Microsoft.Xna.Framework;
 
-namespace Haruka.MonoGameUtils.Input;
+namespace Haruka.MonoGameUtils.Input.Api;
 
 public abstract class ButtonInputAPI : IInputAPI {
 
     public static int KeyHoldTimeGlobal = 500;
     public static int KeyRepeatStartTime = 300;
 
-    public ButtonInputAPI() {
+    private readonly Dictionary<Key, int> monitors = new Dictionary<Key, int>();
+
+    public virtual void Initialize() {
         IniFile ini = ExtendedGame.Instance.Configuration;
         if (ini != null) {
             KeyHoldTimeGlobal = ini.ReadInt("ButtonRepeatDelay", InputManager.SECTION_INPUT, 500);
@@ -16,7 +18,9 @@ public abstract class ButtonInputAPI : IInputAPI {
         }
     }
 
-    private readonly Dictionary<Key, int> monitors = new Dictionary<Key, int>();
+    public abstract void Start();
+
+    public abstract void Stop();
 
     public abstract void Bind(Key key, string[] bindings);
 
@@ -59,9 +63,5 @@ public abstract class ButtonInputAPI : IInputAPI {
     public void ResetKeyHoldTime(Key key, int value = 0) {
         monitors[key] = value;
     }
-
-    public abstract void Initialize();
-    public abstract Exception GetError();
-    public abstract void ResetError();
-    public abstract DateTime? GetErrorTime();
+    
 }

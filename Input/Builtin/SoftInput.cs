@@ -1,12 +1,25 @@
-﻿using Microsoft.Xna.Framework;
+﻿using Haruka.MonoGameUtils.Input.Api;
+using Microsoft.Xna.Framework;
 
-namespace Haruka.MonoGameUtils.Input;
+namespace Haruka.MonoGameUtils.Input.Builtin;
 
 public class SoftInput : ButtonInputAPI {
 
     private List<Key> prev;
     private List<Key> now;
     private List<Key> queue;
+
+    public override void Initialize() {
+        prev = new List<Key>();
+        now = new List<Key>();
+        queue = new List<Key>();
+    }
+
+    public override void Start() {
+    }
+
+    public override void Stop() {
+    }
 
     public override void Bind(Key key, string[] bindings) {
     }
@@ -16,12 +29,6 @@ public class SoftInput : ButtonInputAPI {
             now.AddRange(queue);
             queue.Clear();
         }
-    }
-
-    public override void Initialize() {
-        prev = new List<Key>();
-        now = new List<Key>();
-        queue = new List<Key>();
     }
 
     public override bool IsJustPressed(Key key) {
@@ -50,14 +57,4 @@ public class SoftInput : ButtonInputAPI {
         }
     }
 
-    public override Exception GetError() {
-        return null;
-    }
-
-    public override DateTime? GetErrorTime() {
-        return null;
-    }
-
-    public override void ResetError() {
-    }
 }

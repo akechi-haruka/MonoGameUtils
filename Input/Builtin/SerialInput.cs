@@ -1,12 +1,11 @@
 ﻿using Haruka.Common.Collections;
+using Haruka.MonoGameUtils.Input.Api;
 using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
 
-namespace Haruka.MonoGameUtils.Input;
+namespace Haruka.MonoGameUtils.Input.Builtin;
 
 public class SerialInput : ButtonInputAPI {
-
-    public const string TAG = nameof(SerialInput);
 
     public enum Button {
         SerialService,
@@ -30,9 +29,7 @@ public class SerialInput : ButtonInputAPI {
 
     public override void Bind(Key key, string[] bindings) {
         foreach (string binding in bindings) {
-            if (!Enum.TryParse(binding, out Button k)) {
-                InputManager.inputLog.LogWarning("Failed to parse key: " + binding);
-            } else {
+            if (Enum.TryParse(binding, out Button k)) {
                 keys.Add(key, k);
             }
         }
@@ -95,14 +92,10 @@ public class SerialInput : ButtonInputAPI {
     public override void Initialize() {
     }
 
-    public override Exception GetError() {
-        return null;
+    public override void Start() {
+        
     }
 
-    public override DateTime? GetErrorTime() {
-        return null;
-    }
-
-    public override void ResetError() {
+    public override void Stop() {
     }
 }

@@ -50,7 +50,7 @@ public class ElementTextBox : UIElement {
     }
 
     public override void SetWidth(int w) {
-        this.width = w;
+        width = w;
         foreach (UIElement child in Children) {
             child.SetWidth(w);
         }
@@ -104,7 +104,7 @@ public class ElementTextBox : UIElement {
     }
 
     protected override void UpdateElement(ExtendedGame game, InputManager inputManager, Screen screen, GameTime gameTime) {
-        if (inputManager.IsAnyJustPressed(Inputs.P1Cancel) && AllowCancel) {
+        if (inputManager.IsAnyJustPressed(Inputs.INT_KBD_ESC) && AllowCancel) {
             Submit(null);
         } else if (inputManager.IsAnyJustPressed(Inputs.INT_KBD_CTRL)){
             if (inputManager.IsAnyJustPressed(Inputs.INT_KBD_X)) {

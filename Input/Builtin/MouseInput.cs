@@ -1,7 +1,8 @@
-﻿using Microsoft.Xna.Framework;
+﻿using Haruka.MonoGameUtils.Input.Api;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 
-namespace Haruka.MonoGameUtils.Input;
+namespace Haruka.MonoGameUtils.Input.Builtin;
 
 public class MouseInput : ICursorAPI {
 
@@ -11,10 +12,6 @@ public class MouseInput : ICursorAPI {
     private MouseState current;
     private bool drag;
     private Point? dragStart;
-
-    public MouseInput() {
-        prev = default;
-    }
 
     public void EarlyUpdate(GameTime time) {
         current = Mouse.GetState();
@@ -55,9 +52,6 @@ public class MouseInput : ICursorAPI {
         return prev.Position != current.Position;
     }
 
-    public void Initialize() {
-    }
-
     public bool IsDragging() {
         return drag;
     }
@@ -86,14 +80,12 @@ public class MouseInput : ICursorAPI {
         return distance.Length() < MIN_DISTANCE;
     }
 
-    public Exception GetError() {
-        return null;
+    public void Initialize() {
     }
 
-    public DateTime? GetErrorTime() {
-        return null;
+    public void Start() {
     }
 
-    public void ResetError() {
+    public void Stop() {
     }
 }

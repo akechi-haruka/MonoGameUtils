@@ -1,24 +1,17 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Haruka.MonoGameUtils.Input.Api;
+using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input.Touch;
 
-namespace Haruka.MonoGameUtils.Input;
+namespace Haruka.MonoGameUtils.Input.Builtin;
 
 public class TouchInput : ICursorAPI {
 
     private const int MIN_DISTANCE = 200;
 
-    protected TouchCollection Prev = default;
+    protected TouchCollection Prev;
     protected TouchCollection Current;
     protected Vector2? DragStart;
-
-    public virtual void Initialize() {
-        if (!TouchPanel.GetCapabilities().IsConnected) {
-            InputManager.inputLog.LogError("No touch panel found!");
-            throw new IOException("No touch panel found");
-        }
-        InputManager.inputLog.LogInformation(TouchPanel.GetCapabilities().MaximumTouchCount + " maximum touches");
-    }
 
     public virtual void EarlyUpdate(GameTime time) {
         Current = TouchPanel.GetState();
@@ -86,16 +79,18 @@ public class TouchInput : ICursorAPI {
         return true;// return current.Count > 0 && dragStart != null && (current[0].Position - dragStart.Value).Length() < MIN_DISTANCE; todo buggy af
     }
 
-
-    public Exception GetError() {
-        return null;
+    public void Initialize() {
+        
     }
 
-    public DateTime? GetErrorTime() {
-        return null;
+    public void Start() {
+        if (!TouchPanel.GetCapabilities().IsConnected) {
+            InputManager.InputLog.LogError("No touch panel found!");
+            throw new InputException("No touch panel found!");
+        }
+        InputManager.InputLog.LogInformation(TouchPanel.GetCapabilities().MaximumTouchCount + " maximum touches");
     }
 
-    public void ResetError() {
+    public void Stop() {
     }
-
 }

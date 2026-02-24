@@ -12,7 +12,7 @@ public class ElementRectangle : UIElement, IColorable, IAlphaable {
 
     public int Width { get; private set; }
     public int Height { get; private set; }
-    public bool Fill { get; private set; }
+    public bool Fill { get; }
     public Color Color { get; set; }
     public float Alpha {
         get {

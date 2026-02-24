@@ -19,8 +19,8 @@ public class RepeatMoveAnimator : IAnimator {
 
     public RepeatMoveAnimator(UIElement obj, int offset_x, int offset_y, int speed = 1000) {
         this.obj = obj;
-        this.orig_x = obj.GetX();
-        this.orig_y = obj.GetY();
+        orig_x = obj.GetX();
+        orig_y = obj.GetY();
         this.offset_x = offset_x;
         this.offset_y = offset_y;
         this.speed = speed;

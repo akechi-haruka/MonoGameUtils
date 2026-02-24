@@ -222,19 +222,8 @@ public static class Primitives2D {
     /// <param name="spriteBatch">The destination drawing surface</param>
     /// <param name="rect">The rectangle to draw</param>
     /// <param name="color">The color to draw the rectangle in</param>
-    public static void DrawRectangle(this SpriteBatch spriteBatch, Rectangle rect, Color color) {
-        DrawRectangle(spriteBatch, rect, color, 1.0f);
-    }
-
-
-    /// <summary>
-    /// Draws a rectangle with the thickness provided
-    /// </summary>
-    /// <param name="spriteBatch">The destination drawing surface</param>
-    /// <param name="rect">The rectangle to draw</param>
-    /// <param name="color">The color to draw the rectangle in</param>
     /// <param name="thickness">The thickness of the lines</param>
-    public static void DrawRectangle(this SpriteBatch spriteBatch, Rectangle rect, Color color, float thickness) {
+    public static void DrawRectangle(this SpriteBatch spriteBatch, Rectangle rect, Color color, float thickness = 1.0f) {
         // TODO: Handle rotations
         // TODO: Figure out the pattern for the offsets required and then handle it in the line instead of here
 
@@ -330,7 +319,7 @@ public static class Primitives2D {
         // calculate the angle between the two vectors
         float angle = (float)Math.Atan2(point2.Y - point1.Y, point2.X - point1.X);
 
-        DrawLine(spriteBatch, point1, distance, angle, color, thickness);
+        spriteBatch.DrawLine(point1, distance, angle, color, thickness);
     }
 
 

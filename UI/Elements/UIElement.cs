@@ -21,6 +21,8 @@ public abstract class UIElement {
     public bool DestroyWhenInvisible { get; set; }
     protected List<IAnimator> Animators { get; set; } = new List<IAnimator>();
     protected List<UIElement> Children { get; set; } = new List<UIElement>();
+    public bool BlockUpdatePropagation { get; set; }
+
     protected readonly ExtendedGame Game;
 
     protected UIElement(int x, int y) {

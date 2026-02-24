@@ -1,5 +1,7 @@
 ﻿using Haruka.Common;
 using Haruka.Common.Configuration;
+using Haruka.MonoGameUtils.Input.Api;
+using Haruka.MonoGameUtils.Input.Builtin;
 using Haruka.MonoGameUtils.UI.Elements;
 using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
@@ -8,25 +10,22 @@ namespace Haruka.MonoGameUtils.Input;
 
 public class InputManager {
     public const string SECTION_INPUT = "Input";
-    internal static ILogger inputLog;
+    internal static ILogger InputLog;
 
-    public List<Exception> InputAPIInitializationErrors { get; private set; } = new List<Exception>();
-    public List<ICursorAPI> CursorInputs { get; private set; } = new List<ICursorAPI>();
-    public List<ButtonInputAPI> ButtonInputs { get; private set; } = new List<ButtonInputAPI>();
-    private readonly List<IInputAPI> inputs = new List<IInputAPI>();
-    private GameWindow window;
+    public List<ICursorAPI> CursorInputs { get; } = new List<ICursorAPI>();
+    public List<ButtonInputAPI> ButtonInputs { get; } = new List<ButtonInputAPI>();
+    private readonly List<InputInstance> inputs = new List<InputInstance>();
 
     internal bool IsFocused { get; set; }
     internal bool AcceptForegroundInputOnly { get; }
 
-    private int blockInputFrames = 0;
+    private int blockInputFrames;
 
-    public InputManager(IniFile configuration, GameWindow window, params IInputAPI[] customSystems) {
-        inputLog = Log.GetOrCreate("Inpt");
+    public InputManager(IniFile configuration, params IInputAPI[] customSystems) {
+        InputLog = Log.GetOrCreate("Inpt");
 
         AcceptForegroundInputOnly = configuration.ReadBool("ForegroundInputOnly", SECTION_INPUT);
 
-        this.window = window;
         List<IInputAPI> list = new List<IInputAPI> {
             new KeyboardInput(),
             new MouseInput(),
@@ -35,27 +34,24 @@ public class InputManager {
             new SerialInput(),
             new SoftInput()
         };
+        list.AddRange(customSystems);
 
         foreach (IInputAPI input in list) {
             string n = input.GetType().Name;
             if (input is SoftInput || configuration.ReadBool(n, SECTION_INPUT, true)) {
-                inputLog.LogInformation("Enabling input system: " + n);
-
-                InitializeInputSystem(configuration, input);
+                InputLog.LogInformation("Enabling input system: " + n);
+                InitializeInput(configuration, input);
             } else {
-                inputLog.LogInformation("Input System disabled: " + n);
+                InputLog.LogInformation("Input system disabled: " + n);
             }
         }
     }
 
-    private void InitializeInputSystem(IniFile configuration, IInputAPI input) {
-        try {
-            input.Initialize();
-        } catch (Exception ex) {
-            InputAPIInitializationErrors.Add(ex);
-            return;
-        }
+    private void InitializeInput(IniFile configuration, IInputAPI input) {
+        input.Initialize();
 
+        // TODO: input.start?
+        
         if (input is ButtonInputAPI buttoninput) {
             foreach (Key key in Inputs.ALL_KEYS) {
                 buttoninput.Bind(key, key.Name != null ? configuration.ReadString(key.Name, SECTION_INPUT, key.DefaultKeyboardKey).Split(',') : new string[] { key.DefaultKeyboardKey });
@@ -66,15 +62,15 @@ public class InputManager {
             CursorInputs.Add(cursorinput);
         }
 
-        inputs.Add(input);
+        inputs.Add(new InputInstance(input));
     }
 
     #region Key Input
 
     public T GetInput<T>() {
-        foreach (IInputAPI input in inputs) {
-            if (input is T) {
-                return (T)input;
+        foreach (InputInstance input in inputs) {
+            if (input.API is T api) {
+                return api;
             }
         }
 
@@ -82,15 +78,7 @@ public class InputManager {
     }
 
     public bool IsAnyPressed(params Key[] keys) {
-        foreach (ButtonInputAPI api in ButtonInputs) {
-            foreach (Key key in keys) {
-                if (api.IsPressed(key)) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
+        return ButtonInputs.Any(api => keys.Any(api.IsPressed));
     }
 
     public bool IsAllPressed(params Key[] keys) {
@@ -111,15 +99,7 @@ public class InputManager {
     }
 
     public bool IsAnyJustPressed(params Key[] keys) {
-        foreach (ButtonInputAPI api in ButtonInputs) {
-            foreach (Key key in keys) {
-                if (api.IsJustPressed(key)) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
+        return ButtonInputs.Any(api => keys.Any(key => api.IsJustPressed(key)));
     }
 
     public void MonitorInput(params Key[] keys) {
@@ -139,15 +119,7 @@ public class InputManager {
     }
 
     public int GetKeyPressDuration(Key key) {
-        int val = 0;
-        foreach (ButtonInputAPI api in ButtonInputs) {
-            int val2 = api.GetKeyHoldTime(key);
-            if (val2 > val) {
-                val = val2;
-            }
-        }
-
-        return val;
+        return ButtonInputs.Select(api => api.GetKeyHoldTime(key)).Prepend(0).Max();
     }
 
     public void ResetKeyPressDuration(Key key) {
@@ -173,11 +145,10 @@ public class InputManager {
     }
 
     public void ResetInputStates() {
-        foreach (IInputAPI api in inputs) {
-            api.LateUpdate(new GameTime());
+        foreach (InputInstance input in inputs) {
+            input.API.LateUpdate(new GameTime());
         }
     }
-
 
     public void SkipInputFrame() {
         blockInputFrames = 30; // todo hack
@@ -188,33 +159,15 @@ public class InputManager {
     #region Mouse/Touch Input
 
     public bool IsInClickOrigin() {
-        foreach (ICursorAPI api in CursorInputs) {
-            if (api.IsPressed() && api.IsInClickOrigin()) {
-                return true;
-            }
-        }
-
-        return false;
+        return CursorInputs.Any(api => api.IsPressed() && api.IsInClickOrigin());
     }
 
     public bool IsJustClicked(Rectangle rect) {
-        foreach (ICursorAPI api in CursorInputs) {
-            if (api.IsJustPressed() && rect.Contains(api.GetX(), api.GetY())) {
-                return true;
-            }
-        }
-
-        return false;
+        return CursorInputs.Any(api => api.IsJustPressed() && rect.Contains(api.GetX(), api.GetY()));
     }
 
     public bool IsJustClickReleased(Rectangle rect, bool checkMoved = false) {
-        foreach (ICursorAPI api in CursorInputs) {
-            if (api.IsJustReleased() && rect.Contains(api.GetX(), api.GetY()) && (!checkMoved || api.IsInClickOrigin())) {
-                return true;
-            }
-        }
-
-        return false;
+        return CursorInputs.Any(api => api.IsJustReleased() && rect.Contains(api.GetX(), api.GetY()) && (!checkMoved || api.IsInClickOrigin()));
     }
 
     public bool IsJustClicked(UIElement el) {
@@ -226,13 +179,7 @@ public class InputManager {
     }
 
     public bool IsClicked(Rectangle rect) {
-        foreach (ICursorAPI api in CursorInputs) {
-            if (api.IsPressed() && rect.Contains(api.GetX(), api.GetY())) {
-                return true;
-            }
-        }
-
-        return false;
+        return CursorInputs.Any(api => api.IsPressed() && rect.Contains(api.GetX(), api.GetY()));
     }
 
     public bool IsClicked(UIElement el) {
@@ -240,63 +187,54 @@ public class InputManager {
     }
 
     public bool IsClicked() {
-        foreach (ICursorAPI api in CursorInputs) {
-            if (api.IsPressed()) {
-                return true;
-            }
-        }
-
-        return false;
+        return CursorInputs.Any(api => api.IsPressed());
     }
 
     public int GetTouchX() {
-        foreach (ICursorAPI api in CursorInputs) {
-            int x = api.GetX();
-            if (x != 0) {
-                return x;
-            }
-        }
-
-        return 0;
+        return CursorInputs.Select(api => api.GetX()).FirstOrDefault(x => x != 0);
     }
 
     public int GetTouchY() {
-        foreach (ICursorAPI api in CursorInputs) {
-            int y = api.GetY();
-            if (y != 0) {
-                return y;
-            }
-        }
-
-        return 0;
+        return CursorInputs.Select(api => api.GetY()).FirstOrDefault(y => y != 0);
     }
 
     public Vector2 GetDragDistance() {
-        foreach (ICursorAPI api in CursorInputs) {
-            if (api.IsDragging()) {
-                return api.GetDragDistance();
-            }
-        }
-
-        return Vector2.Zero;
+        ICursorAPI input = CursorInputs.FirstOrDefault(api => api.IsDragging());
+        return input?.GetDragDistance() ?? Vector2.Zero;
     }
 
     #endregion
 
 
     internal void EarlyUpdate(GameTime gameTime) {
-        if ((!AcceptForegroundInputOnly || IsFocused) && blockInputFrames <= 0) {
-            foreach (IInputAPI input in inputs) {
-                input.EarlyUpdate(gameTime);
+        if ((AcceptForegroundInputOnly && !IsFocused) || blockInputFrames > 0) {
+            return;
+        }
+
+        foreach (InputInstance input in inputs.Where(input => !input.HasError())) {
+            try {
+                input.API.EarlyUpdate(gameTime);
+            } catch (InputException ex) {
+                input.SetError(ex.Message, ex.InnerException);
+            } catch (Exception ex) {
+                input.SetError("Internal Error", ex);
             }
         }
     }
 
     internal void LateUpdate(GameTime gameTime) {
         if (!AcceptForegroundInputOnly || IsFocused) {
-            foreach (IInputAPI input in inputs) {
-                input.LateUpdate(gameTime);
+            
+            foreach (InputInstance input in inputs.Where(input => !input.HasError())) {
+                try {
+                    input.API.LateUpdate(gameTime);
+                } catch (InputException ex) {
+                    input.SetError(ex.Message, ex.InnerException);
+                } catch (Exception ex) {
+                    input.SetError("Internal Error", ex);
+                }
             }
+            
         }
 
         if (blockInputFrames > 0) {
@@ -304,7 +242,7 @@ public class InputManager {
         }
     }
 
-    public IInputAPI[] GetInputAPIList() {
+    public InputInstance[] GetInputs() {
         return inputs.ToArray();
     }
 }

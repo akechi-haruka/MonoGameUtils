@@ -8,16 +8,12 @@ namespace Haruka.MonoGameUtils.UI.Elements;
 
 public class ElementPopup : UIElement, IAlphaable {
 
-    private string header;
-    private string value;
     private float alpha;
     private readonly int height;
     private readonly int width;
     private readonly int borderSize = 5;
 
     public ElementPopup(string header, string value) : base(Screen.TopCenterSafeFrame.X - 350 / 2, Screen.TopCenterSafeFrame.Y) {
-        this.header = header;
-        this.value = value;
         height = (int)(Game.Skin.DefaultFont.MeasureString(header).Y + Game.Skin.DefaultFont.MeasureString(value).Y + borderSize * 2);
         width = Math.Max(350, (int)(Game.Skin.DefaultFont.MeasureString(value).Y + Game.Skin.DefaultFont.MeasureString(value).X + borderSize * 2));
         SetPosition(new Point(Screen.TopCenterSafeFrame.X - width / 2, Screen.TopCenterSafeFrame.Y));
@@ -26,8 +22,8 @@ public class ElementPopup : UIElement, IAlphaable {
             BorderSize = borderSize
         });
         Children.Add(new ElementRectangle(GetX(), GetY(), width, height, Color.Gray, true));
-        Children.Add(new ElementText(header, GetX() + width / 2, GetY() + borderSize, true, false));
-        Children.Add(new ElementText(value, GetX() + width / 2, GetY() + borderSize + Game.Skin.DefaultFontHeight, true, false));
+        Children.Add(new ElementText(header, GetX() + width / 2, GetY() + borderSize, true));
+        Children.Add(new ElementText(value, GetX() + width / 2, GetY() + borderSize + Game.Skin.DefaultFontHeight, true));
 
         alpha = 1.0F;
         DestroyWhenInvisible = true;
@@ -38,11 +34,11 @@ public class ElementPopup : UIElement, IAlphaable {
         set { PropagateAlpha(value); }
     }
 
-    private void PropagateAlpha(float alpha) {
-        this.alpha = alpha;
+    private void PropagateAlpha(float a) {
+        alpha = a;
         foreach (UIElement child in Children) {
             if (child is IAlphaable alphaable) {
-                alphaable.Alpha = alpha;
+                alphaable.Alpha = a;
             }
         }
     }
@@ -59,7 +55,7 @@ public class ElementPopup : UIElement, IAlphaable {
         return width;
     }
 
-    public override void SetHeight(int height) {
+    public override void SetHeight(int h) {
         throw new NotImplementedException();
     }
 

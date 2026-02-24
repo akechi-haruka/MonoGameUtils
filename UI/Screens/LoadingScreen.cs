@@ -19,15 +19,12 @@ public class LoadingScreen : Screen {
     }
 
     protected override void OnScreenOpened() {
-        OnGameResized();
         new Thread(RunDelegate) {
             Name = "Loading Delegate"
         }.Start();
     }
 
-    public override void OnGameResized() {
-        base.OnGameResized();
-        RemoveAllElements();
+    public override void OnCreateScreenElements() {
         AddElement(new ElementText(text, Game.Width / 2, Game.Height / 2, true, true));
     }
 

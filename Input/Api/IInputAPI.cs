@@ -1,6 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 
-namespace Haruka.MonoGameUtils.Input;
+namespace Haruka.MonoGameUtils.Input.Api;
 
 public interface IInputAPI {
 
@@ -10,7 +10,7 @@ public interface IInputAPI {
         
     public void Initialize();
 
-    public Exception GetError();
-    public DateTime? GetErrorTime();
-    public void ResetError();
+    public void Start();
+
+    public void Stop();
 }

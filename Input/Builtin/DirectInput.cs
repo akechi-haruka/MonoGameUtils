@@ -1,16 +1,14 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Haruka.MonoGameUtils.Input.Api;
+using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
 using SharpDX.DirectInput;
 
-namespace Haruka.MonoGameUtils.Input;
+namespace Haruka.MonoGameUtils.Input.Builtin;
 
 public class JoystickInfo {
     public readonly DeviceInstance JoystickInstance;
     public Joystick JoystickClassInstance;
-    public bool Errored;
-    public Exception Error;
     public bool Active;
-    public DateTime ErrorTime;
 
     public JoystickInfo(DeviceInstance deviceInstance) {
         JoystickInstance = deviceInstance;
@@ -40,7 +38,7 @@ public class DirectInput : ButtonInputAPI {
         return DeviceToString(GetByJoystick(j).JoystickInstance);
     }
 
-    internal string DeviceToString(DeviceInstance j) {
+    internal static string DeviceToString(DeviceInstance j) {
         return j.ProductName + " / " + j.ProductGuid;
     }
 
@@ -55,40 +53,13 @@ public class DirectInput : ButtonInputAPI {
         Reset();
     }
 
-    public override void Initialize() {
-
-        directInput = new SharpDX.DirectInput.DirectInput();
-
-        foreach (DeviceInstance deviceInstance in directInput.GetDevices(DeviceType.Gamepad, DeviceEnumerationFlags.AllDevices)) {
-            InputManager.inputLog.LogInformation("Detected DirectInput device: ");
-            PrintAdd(deviceInstance);
-            joystickData.Add(new JoystickInfo(deviceInstance));
-        }
-        foreach (DeviceInstance deviceInstance in directInput.GetDevices(DeviceType.Joystick, DeviceEnumerationFlags.AllDevices)) {
-            InputManager.inputLog.LogInformation("Detected DirectInput device: ");
-            PrintAdd(deviceInstance);
-            joystickData.Add(new JoystickInfo(deviceInstance));
-        }
-
-        foreach (JoystickInfo j in joystickData) {
-
-            Joystick controller = new Joystick(directInput, j.JoystickInstance.InstanceGuid);
-            controller.Properties.BufferSize = 128;
-            controller.Acquire();
-
-            j.JoystickClassInstance = controller;
-            prevstates[j.JoystickClassInstance] = new JoystickState();
-            states[j.JoystickClassInstance] = new JoystickState();
-        }
-    }
-
-    private void PrintAdd(DeviceInstance d) {
-        InputManager.inputLog.LogInformation("  Instance ID: " + d.InstanceGuid);
-        InputManager.inputLog.LogInformation("  Instance Name: " + d.InstanceName);
-        InputManager.inputLog.LogInformation("  Product ID: " + d.ProductGuid);
-        InputManager.inputLog.LogInformation("  Product Name: " + d.ProductName);
-        InputManager.inputLog.LogInformation("  Type: " + d.Type);
-        InputManager.inputLog.LogInformation("  Subtype: " + d.Subtype);
+    private static void PrintAdd(DeviceInstance d) {
+        InputManager.InputLog.LogInformation("  Instance ID: " + d.InstanceGuid);
+        InputManager.InputLog.LogInformation("  Instance Name: " + d.InstanceName);
+        InputManager.InputLog.LogInformation("  Product ID: " + d.ProductGuid);
+        InputManager.InputLog.LogInformation("  Product Name: " + d.ProductName);
+        InputManager.InputLog.LogInformation("  Type: " + d.Type);
+        InputManager.InputLog.LogInformation("  Subtype: " + d.Subtype);
     }
 
     public override void Bind(Key key, string[] bindings) {
@@ -101,29 +72,28 @@ public class DirectInput : ButtonInputAPI {
             if (binding.Contains('.')) {
                 string[] parts = binding.Split('.');
                 if (parts.Length != 2) {
-                    InputManager.inputLog.LogWarning("Setting for " + key.Name + " is not in format DeviceIndex.ButtonIndex or DeviceName.ButtonIndex: " + binding);
+                    InputManager.InputLog.LogWarning("Setting for " + key.Name + " is not in format DeviceIndex.ButtonIndex or DeviceName.ButtonIndex: " + binding);
                     continue;
                 }
                 instance = JoystickIndexByName(parts[0]);
                 if (instance == null) {
                     if (!Int32.TryParse(parts[0], out int index)) {
-                        InputManager.inputLog.LogWarning("Unrecognized controller name or index for " + key.Name + ": " + parts[0]);
+                        InputManager.InputLog.LogWarning("Unrecognized controller name or index for " + key.Name + ": " + parts[0]);
                         continue;
                     }
                     instance = joystickData[index];
                 }
                 if (!Int32.TryParse(parts[1], out button)) {
-                    InputManager.inputLog.LogWarning("Setting for " + key.Name + " is not in format DeviceIndex.ButtonIndex or DeviceName.ButtonIndex: " + binding);
+                    InputManager.InputLog.LogWarning("Setting for " + key.Name + " is not in format DeviceIndex.ButtonIndex or DeviceName.ButtonIndex: " + binding);
                     continue;
                 }
             } else {
                 if (joystickData.Count == 0) {
-                    InputManager.inputLog.LogWarning("No joysticks connected for: " + key.Name);
+                    InputManager.InputLog.LogWarning("No joysticks connected for: " + key.Name);
                     continue;
                 }
                 instance = joystickData[0];
                 if (!Int32.TryParse(binding, out button)) {
-                    InputManager.inputLog.LogWarning("Setting for " + key.Name + " is not a button number: " + binding);
                     continue;
                 }
             }
@@ -131,11 +101,11 @@ public class DirectInput : ButtonInputAPI {
             Joystick controller = instance.JoystickClassInstance;
 
             if (button >= controller.Capabilities.ButtonCount) {
-                InputManager.inputLog.LogWarning("Joystick " + DeviceToString(controller) + " for setting " + key.Name + " has no button " + button);
+                InputManager.InputLog.LogWarning("Joystick " + DeviceToString(controller) + " for setting " + key.Name + " has no button " + button);
                 continue;
             }
 
-            InputManager.inputLog.LogInformation("Added binding for " + DeviceToString(controller) + ", button " + button);
+            InputManager.InputLog.LogInformation("Added binding for " + DeviceToString(controller) + ", button " + button);
             keys.Add(new Tuple<Joystick, int>(controller, button));
 
         }
@@ -150,24 +120,6 @@ public class DirectInput : ButtonInputAPI {
             }
         }
         return null;
-    }
-
-    public override void EarlyKeyUpdate(GameTime time) {
-        foreach (JoystickInfo j in joystickData) {
-            if (j.Errored) {
-                try {
-                    states[j.JoystickClassInstance] = j.JoystickClassInstance.GetCurrentState();
-                } catch (Exception ex) {
-                    InputManager.inputLog.LogError("Failed to update joystick device!");
-                    PrintAdd(j.JoystickInstance);
-                    states[j.JoystickClassInstance] = new JoystickState();
-                    j.ErrorTime = DateTime.Now;
-                    j.Errored = true;
-                    j.Error = ex;
-                    return;
-                }
-            }
-        }
     }
 
     public override bool IsJustPressed(Key key) {
@@ -208,12 +160,8 @@ public class DirectInput : ButtonInputAPI {
         return states[index];
     }
 
-    public override Exception GetError() {
-        return joystickData.FirstOrDefault(j => j.Errored)?.Error;
-    }
-
     public void Reset() {
-        InputManager.inputLog.LogInformation("Resetting all devices");
+        InputManager.InputLog.LogInformation("Resetting all devices");
         foreach (JoystickInfo j in joystickData) {
             if (j.JoystickClassInstance != null) {
                 try {
@@ -227,12 +175,42 @@ public class DirectInput : ButtonInputAPI {
         joystickData = new List<JoystickInfo>();
     }
 
-    public override void ResetError() {
-        Reset();
-        Initialize();
+    public override void EarlyKeyUpdate(GameTime time) {
+        foreach (JoystickInfo j in joystickData.Where(j => j.Active)) {
+            states[j.JoystickClassInstance] = j.JoystickClassInstance.GetCurrentState();
+        }
     }
 
-    public override DateTime? GetErrorTime() {
-        return joystickData.FirstOrDefault(j => j.Errored)?.ErrorTime;
+    public override void Initialize() {
+        directInput = new SharpDX.DirectInput.DirectInput();
     }
+
+    public override void Start() {
+        foreach (DeviceInstance deviceInstance in directInput.GetDevices(DeviceType.Gamepad, DeviceEnumerationFlags.AllDevices)) {
+            InputManager.InputLog.LogInformation("Detected DirectInput device: ");
+            PrintAdd(deviceInstance);
+            joystickData.Add(new JoystickInfo(deviceInstance));
+        }
+        foreach (DeviceInstance deviceInstance in directInput.GetDevices(DeviceType.Joystick, DeviceEnumerationFlags.AllDevices)) {
+            InputManager.InputLog.LogInformation("Detected DirectInput device: ");
+            PrintAdd(deviceInstance);
+            joystickData.Add(new JoystickInfo(deviceInstance));
+        }
+
+        foreach (JoystickInfo j in joystickData) {
+
+            Joystick controller = new Joystick(directInput, j.JoystickInstance.InstanceGuid);
+            controller.Properties.BufferSize = 128;
+            controller.Acquire();
+
+            j.JoystickClassInstance = controller;
+            prevstates[j.JoystickClassInstance] = new JoystickState();
+            states[j.JoystickClassInstance] = new JoystickState();
+        }
+    }
+
+    public override void Stop() {
+        Reset();
+    }
+
 }

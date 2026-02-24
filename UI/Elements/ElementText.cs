@@ -80,14 +80,14 @@ public class ElementText : UIElement, IColorable, IAlphaable {
         width = (int)vec.X;
         height = (int)vec.Y;
         if (centerX || centerY) {
-            origin = new Vector2(centerX ? width / 2 : 0, centerY ? height / 2 : 0);
+            origin = new Vector2(centerX ? width / 2F : 0, centerY ? height / 2F : 0);
         } else {
             origin = Vector2.Zero;
         }
         GenRect();
     }
 
-    internal void UpdateTextDirect(string text) {
+    public void UpdateTextDirect(string text) {
         Text = text;
     }
 

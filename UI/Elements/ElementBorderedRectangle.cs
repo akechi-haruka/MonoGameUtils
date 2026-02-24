@@ -30,7 +30,7 @@ public class ElementBorderedRectangle : UIElement, IColorable, IAlphaable {
             Fill = value;
         }
     }
-    public int BorderSize { get; set; } = 1;
+    public int BorderSize { get; set; }
 
     public ElementBorderedRectangle(int x, int y, int width, int height, Color inner, Color border, int borderSize = 1, params IAnimator[] animators) : base(x, y) {
         Width = width;

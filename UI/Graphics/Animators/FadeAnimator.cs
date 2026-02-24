@@ -26,9 +26,9 @@ public class FadeAnimator : IAnimator {
         if (!Paused) {
             time += gameTime.ElapsedGameTime.TotalMilliseconds;
             if (time > delay) {
-                float alpha = 1F - (float)((time - delay) / length);
-                if (alpha > 0) {
-                    this.alpha.Alpha = alpha;
+                float a = 1F - (float)((time - delay) / length);
+                if (a > 0) {
+                    alpha.Alpha = a;
                 } else {
                     element.Visible = false;
                     Paused = true;

@@ -29,9 +29,9 @@ public class RenderUtils {
                         wrappedText.Append(word.Substring(0, word.IndexOf('\n')));
                         wrappedText.Append("...");
                         break;
-                    } else {
-                        linewidth = size.X + spaceWidth;
                     }
+
+                    linewidth = size.X + spaceWidth;
                 } else {
                     linewidth += size.X + spaceWidth;
                 }
@@ -40,10 +40,10 @@ public class RenderUtils {
                 if (lines > maxLines) {
                     wrappedText.Append("...");
                     break;
-                } else {
-                    wrappedText.Append('\n');
-                    linewidth = size.X + spaceWidth;
                 }
+
+                wrappedText.Append('\n');
+                linewidth = size.X + spaceWidth;
             }
 
             wrappedText.Append(word);

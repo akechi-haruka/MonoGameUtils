@@ -46,6 +46,7 @@ public abstract class Screen {
 
     internal void OpenScreen(Screen prev) {
         PreviousScreen = prev;
+        ResetScreenElements();
         OnScreenOpened();
     }
 
@@ -58,11 +59,10 @@ public abstract class Screen {
     protected virtual void OnScreenClosed() { }
 
     public void Draw(GameTime gameTime, SpriteBatch spriteBatch) {
-        foreach (UIElement e in elements) {
-            if (e.Visible) {
-                e.Draw(gameTime, spriteBatch);
-            }
+        foreach (UIElement e in elements.Where(e => e.Visible)) {
+            e.Draw(gameTime, spriteBatch);
         }
+
         DrawScreen(gameTime, spriteBatch);
     }
 
@@ -85,6 +85,10 @@ public abstract class Screen {
                     if (Game.InputManager.IsJustClickReleased(e, it.ShouldDoOriginCheck())){
                         it.OnTouch(Game.InputManager.GetTouchX(), Game.InputManager.GetTouchY());
                     }
+                }
+
+                if (e.BlockUpdatePropagation) {
+                    return;
                 }
             }
         }
@@ -121,6 +125,7 @@ public abstract class Screen {
     }
 
     public virtual void OnGameResized() {
+        ResetScreenElements();
     }
 
     public virtual void OnCreateScreenElements() {
@@ -140,13 +145,11 @@ public abstract class Screen {
     public UIElement GetElementAt(Point p, UiElementSearchOrder order = UiElementSearchOrder.Topmost) {
         UIElement el = null;
         lock (elements) {
-            foreach (UIElement e in elements) {
-                if (e.GetRect().Contains(p)) {
-                    if (order == UiElementSearchOrder.Topmost) {
-                        el = e;
-                    } else if (order == UiElementSearchOrder.First) {
-                        return e;
-                    }
+            foreach (UIElement e in elements.Where(e => e.GetRect().Contains(p))) {
+                if (order == UiElementSearchOrder.Topmost) {
+                    el = e;
+                } else if (order == UiElementSearchOrder.First) {
+                    return e;
                 }
             }
         }

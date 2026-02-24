@@ -1,10 +1,10 @@
-﻿using Haruka.Common;
-using Haruka.Common.Collections;
+﻿using Haruka.Common.Collections;
+using Haruka.MonoGameUtils.Input.Api;
 using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 
-namespace Haruka.MonoGameUtils.Input;
+namespace Haruka.MonoGameUtils.Input.Builtin;
 
 public class KeyboardInput : ButtonInputAPI {
 
@@ -16,16 +16,15 @@ public class KeyboardInput : ButtonInputAPI {
         get { return current.NumLock; }
     }
 
-    private KeyboardState prev = default;
+    private KeyboardState prev;
     private KeyboardState current;
     private readonly BijectiveDictionary<Key, Keys> keys = new BijectiveDictionary<Key, Keys>();
 
     public override void Bind(Key key, string[] bindings) {
         foreach (string binding in bindings) {
-            if (!Enum.TryParse(binding, out Keys k)) {
-                InputManager.inputLog.LogWarning("Failed to parse key: " + binding);
+            if (Enum.TryParse(binding, out Keys k)) {
+                keys.Add(key, k);
             }
-            keys.Add(key, k);
         }
     }
 
@@ -87,17 +86,9 @@ public class KeyboardInput : ButtonInputAPI {
         prev = current;
     }
 
-    public override void Initialize() {
+    public override void Start() {
     }
 
-    public override Exception GetError() {
-        return null;
-    }
-
-    public override void ResetError() {
-    }
-
-    public override DateTime? GetErrorTime() {
-        return null;
+    public override void Stop() {
     }
 }

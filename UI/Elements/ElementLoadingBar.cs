@@ -9,7 +9,7 @@ namespace Haruka.MonoGameUtils.UI.Elements;
 public class ElementLoadingBar : UIElement {
 
     private Rectangle rect;
-    public bool IsCentered { get; private set; }
+    public bool IsCentered { get; }
     public Color Fill { get; set; }
     public Color Border { get; set; }
     public float Progress { get; set; }
