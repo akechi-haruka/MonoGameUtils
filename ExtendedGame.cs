@@ -460,6 +460,7 @@ public abstract class ExtendedGame : Game {
                 }
             }
 
+            CurrentScreen?.Update(gameTime);
             Overlay?.Update(gameTime);
 
             InputManager.LateUpdate(gameTime);
