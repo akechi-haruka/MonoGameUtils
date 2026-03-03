@@ -10,7 +10,13 @@ public class ElementText : UIElement, IColorable, IAlphaable {
 
     public static Color DefaultTextColor = Color.White;
 
-    public SpriteFont Font { get; set; }
+    public SpriteFont Font {
+        get;
+        set {
+            field = value ?? Game.Skin.FallbackFont;
+        }
+    }
+
     public Color Color { get; set; } = ExtendedGame.Instance.Skin.UnselectedItemColor;
     public float Alpha {
         get {
@@ -38,11 +44,7 @@ public class ElementText : UIElement, IColorable, IAlphaable {
         this.centerX = centerX;
         this.centerY = centerY;
         Font = Game.Skin.DefaultFont;
-        if (Font == null) {
-            Font = Game.Skin.FallbackFont;
-        }
         UpdateText(text);
-        //Log.Write(ToString(), "Debug");
     }
 
     public override int GetWidth() {
