@@ -46,12 +46,12 @@ public abstract class ExtendedGame : Game {
     private readonly Dictionary<string, object> resourceCache = new Dictionary<string, object>();
     private readonly List<Action> logicThreadInvoke = new List<Action>();
     private readonly bool dynamicResize;
-    private readonly int originalWidth;
-    private readonly int originalHeight;
+    private readonly ManualResetEvent gameExitWaiter = new ManualResetEvent(false);
 
+    private readonly RenderTarget2D renderTarget;
     private int framesThisSecond = 1;
     private string currentMusic;
-    private readonly ManualResetEvent gameExitWaiter = new ManualResetEvent(false);
+    private Rectangle renderRectangle;
 
     protected ExtendedGame(IniFile config, string windowTitle, int width = 0, int height = 0, bool borderless = false, params IInputAPI[] customInputs) {
         Instance = this;
@@ -87,10 +87,9 @@ public abstract class ExtendedGame : Game {
         Window.AllowAltF4 = Configuration.ReadBool("AllowAltF4", SECTION_MAIN_WINDOW, true);
         Window.AllowUserResizing = Configuration.ReadBool("AllowWindowResize", SECTION_MAIN_WINDOW, true);
         dynamicResize = Configuration.ReadBool("DynamicResize", SECTION_MAIN_WINDOW, true);
-        SetFPS(Configuration.ReadInt("RefreshRate", SECTION_MAIN_WINDOW, 60));
+        SetFps(Configuration.ReadInt("RefreshRate", SECTION_MAIN_WINDOW, 60));
 
-        originalWidth = Width;
-        originalHeight = Height;
+        renderTarget = new RenderTarget2D(GraphicsDevice, Width, Height);
 
         Window.Title = windowTitle;
 
@@ -191,7 +190,7 @@ public abstract class ExtendedGame : Game {
         return tex;
     }
 
-    public Song LoadBGM(string path) {
+    public Song LoadBgm(string path) {
         Song muz;
         string[] extList = new string[] { ".mp3", ".ogg", ".wav" };
         string skinPath = null;
@@ -239,7 +238,7 @@ public abstract class ExtendedGame : Game {
         return muz;
     }
 
-    public SpriteFont LoadSpriteFont(string path, int size = 0, bool includeCJK = false, string ext = ".ttf") {
+    public SpriteFont LoadSpriteFont(string path, int size = 0, bool includeCjk = false, string ext = ".ttf") {
         if (size == 0) {
             size = Skin.DefaultFontHeight;
         }
@@ -267,7 +266,7 @@ public abstract class ExtendedGame : Game {
                 CharacterRange.BasicLatin,
                 CharacterRange.Latin1Supplement
             };
-            if (includeCJK) {
+            if (includeCjk) {
                 cr.Add(CharacterRange.Hiragana);
                 cr.Add(CharacterRange.Katakana);
             }
@@ -288,7 +287,7 @@ public abstract class ExtendedGame : Game {
     public void PlayMusic(string path) {
         if (currentMusic != path) {
             MediaPlayer.IsRepeating = true;
-            Song muz = LoadBGM(path);
+            Song muz = LoadBgm(path);
             if (muz != null) {
                 MediaPlayer.Play(muz);
                 currentMusic = path;
@@ -315,6 +314,7 @@ public abstract class ExtendedGame : Game {
         SetExclusiveFullscreen(exclusiveFullscreen);
         SetBorderless(borderless);
         SetWindowSize(w, h, false);
+        SetRenderSize(w, h);
         ApplyWindowChanges();
         RecreateRenderPositions();
     }
@@ -322,7 +322,8 @@ public abstract class ExtendedGame : Game {
     public void SetWindowSize(int width, int height, bool immediatelyApply = true) {
         Log.Main.LogInformation("Setting window size to " + width + "x" + height);
         if (width > 0 && height > 0) {
-            SetRenderSize(width, height);
+            graphics.PreferredBackBufferWidth = width;
+            graphics.PreferredBackBufferHeight = height;
             if (immediatelyApply) {
                 ApplyWindowChanges();
             }
@@ -337,8 +338,9 @@ public abstract class ExtendedGame : Game {
     public void SetRenderSize(int width, int height) {
         Log.Main.LogInformation("Setting render size to " + width + "x" + height);
         if (width > 0 && height > 0) {
-            Width = graphics.PreferredBackBufferWidth = width;
-            Height = graphics.PreferredBackBufferHeight = height;
+            Width = width;
+            Height = height;
+            renderRectangle = new Rectangle(0, 0, Width, Height);
         }
     }
 
@@ -373,7 +375,7 @@ public abstract class ExtendedGame : Game {
         });
     }
 
-    public void SetFPS(int val) {
+    public void SetFps(int val) {
         if (val <= 0) {
             Log.Main.LogInformation("Setting FPS limit to infinite");
             IsFixedTimeStep = false;
@@ -387,15 +389,14 @@ public abstract class ExtendedGame : Game {
     private void Window_ClientSizeChanged(object sender, EventArgs e) {
         int w = Window.ClientBounds.Width;
         int h = Window.ClientBounds.Height;
+        
         Log.Main.LogInformation("Window resized to " + w + "x" + h);
+        SetRenderSize(w, h);
         if (dynamicResize) {
-            SetRenderSize(w, h);
             RecreateRenderPositions();
-        } else {
-            SetRenderSize(originalWidth, originalHeight);
+            ApplyWindowChanges();
         }
 
-        ApplyWindowChanges();
     }
 
     private void UpdateAnchors() {
@@ -486,6 +487,8 @@ public abstract class ExtendedGame : Game {
 
     protected override void Draw(GameTime gameTime) {
         GraphicsDevice.Clear(Skin.SystemBackgroundColor);
+        GraphicsDevice.SetRenderTarget(renderTarget);
+        GraphicsDevice.Clear(Skin.SystemBackgroundColor);
 
         if (RenderThread == null) {
             RenderThread = Thread.CurrentThread;
@@ -516,6 +519,11 @@ public abstract class ExtendedGame : Game {
         } finally {
             spriteBatch.End();
         }
+        GraphicsDevice.SetRenderTarget(null);
+        
+        spriteBatch.Begin();
+        spriteBatch.Draw(renderTarget, renderRectangle, null, Color.White);
+        spriteBatch.End();
 
         base.Draw(gameTime);
     }
