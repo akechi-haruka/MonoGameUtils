@@ -53,7 +53,7 @@ public abstract class ExtendedGame : Game {
     private string currentMusic;
     private Rectangle renderRectangle;
 
-    protected ExtendedGame(IniFile config, string windowTitle, int width = 0, int height = 0, bool borderless = false, params IInputAPI[] customInputs) {
+    protected ExtendedGame(IniFile config, string windowTitle, int width = 0, int height = 0, bool borderless = false, Key[] customKeys = null, params IInputAPI[] customInputs) {
         Instance = this;
         Configuration = config;
         ResourceLog = Log.GetOrCreate("Rsrc");
@@ -77,7 +77,7 @@ public abstract class ExtendedGame : Game {
         UpdateAnchors();
         Log.Main.LogDebug("Graphics window created");
 
-        InputManager = new InputManager(Configuration, customInputs);
+        InputManager = new InputManager(Configuration, customKeys ?? Array.Empty<Key>(), customInputs);
         InputManager.StartAllInputs();
 
         Overlay = new EmptyScreen();

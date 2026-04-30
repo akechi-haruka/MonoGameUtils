@@ -21,7 +21,10 @@ public class InputManager {
 
     private int blockInputFrames;
 
-    public InputManager(IniFile configuration, params IInputAPI[] customSystems) {
+    public InputManager(IniFile configuration, params IInputAPI[] customSystems) : this(configuration, Array.Empty<Key>(), customSystems){
+    }
+
+    public InputManager(IniFile configuration, Key[] customKeys, params IInputAPI[] customSystems) {
         InputLog = Log.GetOrCreate("Inpt");
 
         AcceptForegroundInputOnly = configuration.ReadBool("ForegroundInputOnly", SECTION_INPUT);
@@ -40,18 +43,18 @@ public class InputManager {
             string n = input.GetType().Name;
             if (input is SoftInput || configuration.ReadBool(n, SECTION_INPUT, true)) {
                 InputLog.LogInformation("Enabling input system: " + n);
-                InitializeInput(configuration, input);
+                InitializeInput(configuration, customKeys, input);
             } else {
                 InputLog.LogInformation("Input system disabled: " + n);
             }
         }
     }
 
-    private void InitializeInput(IniFile configuration, IInputAPI input) {
+    private void InitializeInput(IniFile configuration, Key[] customKeys, IInputAPI input) {
         input.Initialize();
         
         if (input is ButtonInputAPI buttoninput) {
-            foreach (Key key in Inputs.ALL_KEYS) {
+            foreach (Key key in Inputs.ALL_KEYS.Concat(customKeys)) {
                 buttoninput.Bind(key, key.Name != null ? configuration.ReadString(key.Name, SECTION_INPUT, key.DefaultKeyboardKey).Split(',') : new string[] { key.DefaultKeyboardKey });
             }
 
