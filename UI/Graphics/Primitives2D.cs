@@ -1,5 +1,11 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System.Drawing;
+using System.Numerics;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Color = Microsoft.Xna.Framework.Color;
+using Point = Microsoft.Xna.Framework.Point;
+using Rectangle = Microsoft.Xna.Framework.Rectangle;
+using Vector2 = Microsoft.Xna.Framework.Vector2;
 
 namespace Haruka.MonoGameUtils.UI.Graphics;
 

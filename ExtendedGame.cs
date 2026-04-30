@@ -18,7 +18,7 @@ using SpriteFontPlus;
 namespace Haruka.MonoGameUtils;
 
 public abstract class ExtendedGame : Game {
-    private const string SECTION_MAIN_WINDOW = "MainWindow";
+    public const string SECTION_MAIN_WINDOW = "MainWindow";
 
     public static ExtendedGame Instance { get; private set; }
 
@@ -45,6 +45,9 @@ public abstract class ExtendedGame : Game {
     private readonly Lock drawScreenLock = new Lock();
     private readonly Dictionary<string, object> resourceCache = new Dictionary<string, object>();
     private readonly List<Action> logicThreadInvoke = new List<Action>();
+    private readonly bool dynamicResize;
+    private readonly int originalWidth;
+    private readonly int originalHeight;
 
     private int framesThisSecond = 1;
     private string currentMusic;
@@ -83,7 +86,11 @@ public abstract class ExtendedGame : Game {
 
         Window.AllowAltF4 = Configuration.ReadBool("AllowAltF4", SECTION_MAIN_WINDOW, true);
         Window.AllowUserResizing = Configuration.ReadBool("AllowWindowResize", SECTION_MAIN_WINDOW, true);
+        dynamicResize = Configuration.ReadBool("DynamicResize", SECTION_MAIN_WINDOW, true);
         SetFPS(Configuration.ReadInt("RefreshRate", SECTION_MAIN_WINDOW, 60));
+
+        originalWidth = Width;
+        originalHeight = Height;
 
         Window.Title = windowTitle;
 
@@ -102,6 +109,7 @@ public abstract class ExtendedGame : Game {
 
     protected override void LoadContent() {
         Window.ClientSizeChanged += Window_ClientSizeChanged;
+
         spriteBatch = new SpriteBatch(GraphicsDevice);
 
         Skin = new Skin(this, Configuration.ReadString("Skin", SECTION_MAIN_WINDOW, "default"));
@@ -380,9 +388,14 @@ public abstract class ExtendedGame : Game {
         int w = Window.ClientBounds.Width;
         int h = Window.ClientBounds.Height;
         Log.Main.LogInformation("Window resized to " + w + "x" + h);
-        SetRenderSize(w, h);
+        if (dynamicResize) {
+            SetRenderSize(w, h);
+            RecreateRenderPositions();
+        } else {
+            SetRenderSize(originalWidth, originalHeight);
+        }
+
         ApplyWindowChanges();
-        RecreateRenderPositions();
     }
 
     private void UpdateAnchors() {
@@ -426,7 +439,7 @@ public abstract class ExtendedGame : Game {
         Log.Main.LogInformation("Lost focus!");
         InputManager.IsFocused = false;
     }
-    
+
     private void ExtendedGame_Exiting(object sender, ExitingEventArgs e) {
         Log.Main.LogInformation("Exit event received!");
         Running = false;
@@ -460,6 +473,7 @@ public abstract class ExtendedGame : Game {
                 }
             }
 
+            CurrentScreen?.Update(gameTime);
             Overlay?.Update(gameTime);
 
             InputManager.LateUpdate(gameTime);
