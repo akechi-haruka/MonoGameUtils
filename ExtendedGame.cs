@@ -30,6 +30,8 @@ public abstract class ExtendedGame : Game {
     public Screen DrawScreen { get; private set; }
     public int Width { get; private set; }
     public int Height { get; private set; }
+    public int RenderWidth { get; private set; }
+    public int RenderHeight { get; private set; }
     public bool Running { get; private set; }
     public double Framerate { get; protected set; }
     public Skin Skin { get; set; } = new Skin.NullSkin();
@@ -338,9 +340,9 @@ public abstract class ExtendedGame : Game {
     public void SetRenderSize(int width, int height) {
         Log.Main.LogInformation("Setting render size to " + width + "x" + height);
         if (width > 0 && height > 0) {
-            Width = width;
-            Height = height;
-            renderRectangle = new Rectangle(0, 0, Width, Height);
+            RenderWidth = width;
+            RenderHeight = height;
+            renderRectangle = new Rectangle(0, 0, RenderWidth, RenderHeight);
         }
     }
 
