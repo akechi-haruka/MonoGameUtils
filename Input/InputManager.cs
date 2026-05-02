@@ -16,8 +16,8 @@ public class InputManager {
     public List<ButtonInputAPI> ButtonInputs { get; } = new List<ButtonInputAPI>();
     private readonly List<InputInstance> inputs = new List<InputInstance>();
 
-    internal bool IsFocused { get; set; }
-    internal bool AcceptForegroundInputOnly { get; }
+    public bool IsFocused { get; set; }
+    public bool AcceptForegroundInputOnly { get; }
 
     private int blockInputFrames;
 
