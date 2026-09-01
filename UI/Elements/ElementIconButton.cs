@@ -33,7 +33,7 @@ public class ElementIconButton : ElementBorderedRectangle, ITouchable {
     protected override void DrawElement(GameTime gameTime, SpriteBatch spriteBatch) {
         base.DrawElement(gameTime, spriteBatch);
         if (texture != null) {
-            spriteBatch.Draw(texture, GetRect(), TextureTint);
+            spriteBatch.Draw(texture, Rectangle, TextureTint);
         }
     }
 

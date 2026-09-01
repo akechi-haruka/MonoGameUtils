@@ -14,7 +14,6 @@ public class ElementTextBox : UIElement {
     public bool AllowCancel { get; set; }
 
     private string value;
-    private int width;
     private int strWidth;
 
     private readonly ElementText theLine;
@@ -23,9 +22,10 @@ public class ElementTextBox : UIElement {
     public event Action<string> OnConfirm;
 
     public ElementTextBox(int x, int y, int width, string initial = null) : base(x, y) {
-        this.width = width;
+        Width = width;
+        Height = (int)(Game.Skin.DefaultFontHeight * 1.5F);
         value = initial ?? "";
-        AddChild(new ElementRectangle(x, y, width, GetHeight(), Color.White));
+        AddChild(new ElementRectangle(x, y, width, Height, Color.White));
         theLine = new ElementText("|", x, y);
         fa = new FlashAnimator(theLine, 500);
         theLine.AddAnimator(fa);
@@ -33,26 +33,10 @@ public class ElementTextBox : UIElement {
         UpdateStringWidth();
     }
 
-    public override int GetHeight() {
-        return (int)(Game.Skin.DefaultFontHeight * 1.5F);
-    }
-
-    public override Rectangle GetRect() {
-        return new Rectangle(GetX(), GetY(), width, GetHeight());
-    }
-
-    public override int GetWidth() {
-        return width;
-    }
-
-    public override void SetHeight(int height) {
-        throw new NotImplementedException();
-    }
-
-    public override void SetWidth(int w) {
-        width = w;
+    public void SetWidth(int w) {
+        Width = w;
         foreach (UIElement child in Children) {
-            child.SetWidth(w);
+            child.Width = w;
         }
     }
 
@@ -63,7 +47,7 @@ public class ElementTextBox : UIElement {
 
     private void UpdateStringWidth() {
         strWidth = (int)Game.Skin.DefaultFont.MeasureString(value).X;
-        theLine.SetPosition(new Vector2(X + strWidth, theLine.Y));
+        theLine.Position = new Vector2(X + strWidth, theLine.Y);
     }
 
     public void Activate() {

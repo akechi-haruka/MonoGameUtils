@@ -7,20 +7,29 @@ using Microsoft.Xna.Framework.Graphics;
 namespace Haruka.MonoGameUtils.UI.Elements;
 
 public abstract class UIElement {
-    public Vector2 Position { get; private set; }
+    public Vector2 Position { get; set; }
 
-    public float X {
-        get { return Position.X; }
+    public int X {
+        get { return (int)Position.X; }
     }
 
-    public float Y {
-        get { return Position.Y; }
+    public int Y {
+        get { return (int)Position.Y; }
     }
+
+    public Rectangle Rectangle {
+        get {
+            return new Rectangle(X, Y, Width, Height);
+        }
+    }
+    
+    public int Width { get; set; }
+    public int Height { get; set; }
 
     public bool Visible { get; set; }
     public bool DestroyWhenInvisible { get; set; }
-    protected List<IAnimator> Animators { get; set; } = new List<IAnimator>();
-    protected List<UIElement> Children { get; set; } = new List<UIElement>();
+    protected List<IAnimator> Animators { get; } = new List<IAnimator>();
+    protected List<UIElement> Children { get; } = new List<UIElement>();
     public bool BlockUpdatePropagation { get; set; }
 
     protected readonly ExtendedGame Game;
@@ -30,10 +39,6 @@ public abstract class UIElement {
         Position = new Vector2(x, y);
         Visible = true;
     }
-
-    public abstract int GetWidth();
-
-    public abstract int GetHeight();
 
     public void Draw(GameTime gameTime, SpriteBatch spriteBatch) {
         DrawElement(gameTime, spriteBatch);
@@ -58,28 +63,6 @@ public abstract class UIElement {
     }
 
     protected abstract void UpdateElement(ExtendedGame game, InputManager inputManager, Screen screen, GameTime gameTime);
-
-    public abstract void SetWidth(int w);
-
-    public abstract void SetHeight(int height);
-
-    public abstract Rectangle GetRect();
-
-    public int GetX() {
-        return (int)X;
-    }
-
-    public int GetY() {
-        return (int)Y;
-    }
-
-    public virtual void SetPosition(Vector2 position) {
-        Position = position;
-    }
-
-    public void SetPosition(Point position, int xoff = 0, int yoff = 0) {
-        SetPosition(new Vector2(position.X + xoff, position.Y + yoff));
-    }
 
     public void AddAnimator(IAnimator animator) {
         Animators.Add(animator);

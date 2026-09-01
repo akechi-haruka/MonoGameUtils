@@ -8,21 +8,21 @@ public class RepeatMoveAnimator : IAnimator {
 
     public bool Paused { get; set; }
 
-    private readonly int orig_x;
-    private readonly int orig_y;
+    private readonly int origX;
+    private readonly int origY;
     private readonly UIElement obj;
-    private readonly int offset_x;
-    private readonly int offset_y;
+    private readonly int offsetX;
+    private readonly int offsetY;
     private readonly double speed;
 
     private double progress;
 
-    public RepeatMoveAnimator(UIElement obj, int offset_x, int offset_y, int speed = 1000) {
+    public RepeatMoveAnimator(UIElement obj, int offsetX, int offsetY, int speed = 1000) {
         this.obj = obj;
-        orig_x = obj.GetX();
-        orig_y = obj.GetY();
-        this.offset_x = offset_x;
-        this.offset_y = offset_y;
+        origX = obj.X;
+        origY = obj.Y;
+        this.offsetX = offsetX;
+        this.offsetY = offsetY;
         this.speed = speed;
     }
 
@@ -33,9 +33,9 @@ public class RepeatMoveAnimator : IAnimator {
                 progress = 0;
             }
             Vector2 pos = obj.Position;
-            pos.X = (float)(orig_x + (progress / speed) * offset_x);
-            pos.Y = (float)(orig_y + (progress / speed) * offset_y);
-            obj.SetPosition(pos);
+            pos.X = (float)(origX + (progress / speed) * offsetX);
+            pos.Y = (float)(origY + (progress / speed) * offsetY);
+            obj.Position = pos;
         }
     }
 

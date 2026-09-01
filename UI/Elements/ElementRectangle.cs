@@ -8,10 +8,6 @@ using Microsoft.Xna.Framework.Graphics;
 namespace Haruka.MonoGameUtils.UI.Elements;
 
 public class ElementRectangle : UIElement, IColorable, IAlphaable {
-    public Rectangle Rectangle { get; private set; }
-
-    public int Width { get; private set; }
-    public int Height { get; private set; }
     public bool Fill { get; }
     public Color Color { get; set; }
     public float Alpha {
@@ -29,14 +25,9 @@ public class ElementRectangle : UIElement, IColorable, IAlphaable {
         Height = height;
         Color = col;
         Fill = fill;
-        GenRect();
         foreach (IAnimator animator in animators) {
             AddAnimator(animator);
         }
-    }
-
-    private void GenRect() {
-        Rectangle = new Rectangle((int)X, (int)Y, Width, Height);
     }
 
     protected override void DrawElement(GameTime gameTime, SpriteBatch spriteBatch) {
@@ -45,28 +36,6 @@ public class ElementRectangle : UIElement, IColorable, IAlphaable {
         } else {
             spriteBatch.DrawRectangle(Rectangle, Color, BorderSize);
         }
-    }
-
-    public override int GetHeight() {
-        return Height;
-    }
-
-    public override Rectangle GetRect() {
-        return Rectangle;
-    }
-
-    public override int GetWidth() {
-        return Width;
-    }
-
-    public override void SetHeight(int height) {
-        Height = height;
-        GenRect();
-    }
-
-    public override void SetWidth(int w) {
-        Width = w;
-        GenRect();
     }
 
     protected override void UpdateElement(ExtendedGame game, InputManager inputManager, Screen screen, GameTime gameTime) {

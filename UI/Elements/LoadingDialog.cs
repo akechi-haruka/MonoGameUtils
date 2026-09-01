@@ -16,8 +16,7 @@ public class LoadingDialog : Dialog {
     protected override void UpdateElement(ExtendedGame game, InputManager inputManager, Screen screen, GameTime gameTime) {
         if (spinner == null) {
             Texture2D tex = game.LoadTexture("LoadingSpinner");
-            spinner = new Element2D(tex, (int)(X + Width / 2F), (int)(Y + Height / 2F));
-            spinner.SetDrawCentered(true, true);
+            spinner = new Element2D(tex, (int)(X + Width / 2F), (int)(Y + Height / 2F), CenterFlags.CenterX | CenterFlags.CenterY);
             spinner.AddAnimator(new RotateAnimator(spinner, 2));
             Children.Add(spinner);
         }

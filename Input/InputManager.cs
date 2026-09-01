@@ -100,7 +100,7 @@ public class InputManager {
     }
 
     public bool IsAnyJustPressed(params Key[] keys) {
-        return ButtonInputs.Any(api => keys.Any(key => api.IsJustPressed(key)));
+        return ButtonInputs.Any(api => keys.Any(api.IsJustPressed));
     }
 
     public void MonitorInput(params Key[] keys) {
@@ -172,11 +172,11 @@ public class InputManager {
     }
 
     public bool IsJustClicked(UIElement el) {
-        return IsJustClicked(el.GetRect());
+        return IsJustClicked(el.Rectangle);
     }
 
     public bool IsJustClickReleased(UIElement el, bool checkMoved = false) {
-        return IsJustClickReleased(el.GetRect(), checkMoved);
+        return IsJustClickReleased(el.Rectangle, checkMoved);
     }
 
     public bool IsClicked(Rectangle rect) {
@@ -184,7 +184,7 @@ public class InputManager {
     }
 
     public bool IsClicked(UIElement el) {
-        return IsClicked(el.GetRect());
+        return IsClicked(el.Rectangle);
     }
 
     public bool IsClicked() {

@@ -12,17 +12,17 @@ public class Dialog : ElementRectangle {
 
     public Dialog(string message, string[] options = null, int width = 700, int height = 500, bool centerText = false) : base(ExtendedGame.Instance.Width / 2 - width / 2, ExtendedGame.Instance.Height / 2 - height / 2, width, height, ExtendedGame.Instance.Skin.SystemBackgroundColor, true) {
         
-        Children.Add(new ElementRectangle(GetX(), GetY(), width, height, Game.Skin.SystemBorderColor) {
+        Children.Add(new ElementRectangle(X, Y, width, height, Game.Skin.SystemBorderColor) {
             BorderSize = Game.Skin.DialogBorderSize
         });
         
         int messageHeight = options != null ? RenderUtils.CalculateTextLines(height, Game.Skin.DefaultFontHeight) - options.Length - 1 : height;
-        Children.Add(new ElementText(RenderUtils.WrapText(Game.Skin.DefaultFont, message, width, messageHeight), GetX() + Game.Skin.DialogBorderSize + (centerText ? Width / 2 : 0), GetY() + Game.Skin.DialogBorderSize, centerText));
+        Children.Add(new ElementText(RenderUtils.WrapText(Game.Skin.DefaultFont, message, width, messageHeight), X + Game.Skin.DialogBorderSize + (centerText ? Width / 2 : 0), Y + Game.Skin.DialogBorderSize, centerText ? CenterFlags.CenterY : CenterFlags.NoCenter));
         
         if (options != null) {
             for (int i = options.Length - 1; i >= 0; i--) {
                 string option = options[i];
-                ElementText row = new ElementText(RenderUtils.WrapText(Game.Skin.DefaultFont, option, width, 1), GetX() + Game.Skin.DialogBorderSize, GetY() + Game.Skin.DialogBorderSize + height - (Game.Skin.DefaultFontHeight * (i + 1)));
+                ElementText row = new ElementText(RenderUtils.WrapText(Game.Skin.DefaultFont, option, width, 1), X + Game.Skin.DialogBorderSize, Y + Game.Skin.DialogBorderSize + height - (Game.Skin.DefaultFontHeight * (i + 1)));
                 Children.Add(row);
                 this.options.Add(row);
             }

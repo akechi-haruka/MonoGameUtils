@@ -25,7 +25,7 @@ public class LoadingScreen : Screen {
     }
 
     public override void OnCreateScreenElements() {
-        AddElement(new ElementText(text, Game.Width / 2, Game.Height / 2, true, true));
+        AddElement(new ElementText(text, Game.Width / 2, Game.Height / 2, CenterFlags.CenterX | CenterFlags.CenterY));
     }
 
     private void RunDelegate() {

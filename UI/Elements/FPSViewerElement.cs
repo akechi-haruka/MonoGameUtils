@@ -13,8 +13,8 @@ public class FPSViewerElement : UIElement {
     private readonly ElementText text;
 
     public FPSViewerElement() : base(0, 0) {
-        Children.Add(new ElementRectangle(GetX(), GetY(), W, H, Color.Gray, true));
-        Children.Add(new ElementRectangle(GetX(), GetY(), W, H, Color.White) {
+        Children.Add(new ElementRectangle(X, Y, W, H, Color.Gray, true));
+        Children.Add(new ElementRectangle(X, Y, W, H, Color.White) {
             BorderSize = 5
         });
         text = new ElementText("FPS: ---\nFT: ---", 10, 10) {
@@ -22,26 +22,6 @@ public class FPSViewerElement : UIElement {
             Color = Color.White
         };
         Children.Add(text);
-    }
-
-    public override int GetHeight() {
-        return H;
-    }
-
-    public override Rectangle GetRect() {
-        throw new NotImplementedException();
-    }
-
-    public override int GetWidth() {
-        return W;
-    }
-
-    public override void SetHeight(int height) {
-        throw new NotImplementedException();
-    }
-
-    public override void SetWidth(int w) {
-        throw new NotImplementedException();
     }
 
     protected override void DrawElement(GameTime gameTime, SpriteBatch spriteBatch) {

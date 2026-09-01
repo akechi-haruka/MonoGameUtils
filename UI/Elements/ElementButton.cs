@@ -36,7 +36,7 @@ public class ElementButton : ElementBorderedRectangle, ITouchable {
     protected override void DrawElement(GameTime gameTime, SpriteBatch spriteBatch) {
         base.DrawElement(gameTime, spriteBatch);
         if (text != null) {
-            spriteBatch.DrawString(text, GetX() + Width / 2F - textSize.X / 2, GetY() + Height / 2F - textSize.Y / 2, Game.Skin.UnselectedItemColor);
+            spriteBatch.DrawString(text, X + Width / 2F - textSize.X / 2, Y + Height / 2F - textSize.Y / 2, Game.Skin.UnselectedItemColor);
         }
     }
 

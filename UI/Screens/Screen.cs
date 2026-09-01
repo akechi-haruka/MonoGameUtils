@@ -145,7 +145,7 @@ public abstract class Screen {
     public UIElement GetElementAt(Point p, UiElementSearchOrder order = UiElementSearchOrder.Topmost) {
         UIElement el = null;
         lock (elements) {
-            foreach (UIElement e in elements.Where(e => e.GetRect().Contains(p))) {
+            foreach (UIElement e in elements.Where(e => e.Rectangle.Contains(p))) {
                 if (order == UiElementSearchOrder.Topmost) {
                     el = e;
                 } else if (order == UiElementSearchOrder.First) {
