@@ -558,7 +558,7 @@ public abstract class ExtendedGame : Game {
         if (CurrentScreen != null) {
             Log.Main.LogInformation("Opening: " + CurrentScreen.GetType());
             CurrentScreen.ResetScreenElements();
-            CurrentScreen.OpenScreen(CurrentScreen.IgnoreOnScreenStack ? prev?.PreviousScreen : prev);
+            CurrentScreen.OpenScreen(prev?.IgnoreOnScreenStack ?? false ? prev?.PreviousScreen : prev);
         } else {
             Log.Main.LogError("Now loading a null screen!");
         }
