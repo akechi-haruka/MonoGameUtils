@@ -258,4 +258,8 @@ public class InputManager {
             }
         }
     }
+
+    public bool HasTouch() {
+        return inputs.Any(i => i.API is TouchInput && !i.HasError());
+    }
 }
