@@ -269,11 +269,14 @@ public abstract class ExtendedGame : Game {
                 CharacterRange.Latin1Supplement
             };
             if (includeCjk) {
+                cr.Add(new CharacterRange('\u3000', '\u303f')); // punctuation
                 cr.Add(CharacterRange.Hiragana);
                 cr.Add(CharacterRange.Katakana);
+                cr.Add(new CharacterRange('\u3400', '\u4db5')); // kanji
+                cr.Add(new CharacterRange('\u4e00', '\ufa6a')); // kanji
             }
 
-            TtfFontBakerResult fontBakeResult = TtfFontBaker.Bake(File.ReadAllBytes(path), size, 1024, 1024, cr);
+            TtfFontBakerResult fontBakeResult = TtfFontBaker.Bake(File.ReadAllBytes(path), size, 4096, 4096, cr);
             sf = fontBakeResult.CreateSpriteFont(GraphicsDevice);
         } catch (Exception ex) {
             ResourceLog.LogError("Resource access failed: " + ex.Message);
