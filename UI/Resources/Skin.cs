@@ -34,13 +34,13 @@ public class Skin {
     public Texture2D NoTexture { get; private set; }
     public Texture2D BackgroundTexture { get; private set; }
 
-    private readonly ExtendedGame ExtendedGame;
+    private readonly ExtendedGame extendedGame;
 
-    public Skin(ExtendedGame ExtendedGame, string name) {
+    public Skin(ExtendedGame extendedGame, string name) {
         FolderName = name;
         Configuration = IniFile.New("User/Skins/" + name + "/Skin.ini");
         Name = Configuration.ReadString("Name", TAG, "Unnamed Skin");
-        this.ExtendedGame = ExtendedGame;
+        this.extendedGame = extendedGame;
     }
 
     public void Load() {
@@ -49,8 +49,8 @@ public class Skin {
         }
 
         int fontSize = Configuration.ReadInt("FontSize", TAG, 30);
-        FallbackFont = ExtendedGame.Load<SpriteFont>("Fonts/Fallback");
-        NoTexture = ExtendedGame.Load<Texture2D>("NoTexture");
+        FallbackFont = extendedGame.Load<SpriteFont>("Fonts/Fallback");
+        NoTexture = extendedGame.Load<Texture2D>("NoTexture");
 
         if (FallbackFont == null) {
             ExtendedGame.ResourceLog.LogError(" !!! FAILED TO LOAD FALLBACK FONT FILE !!!");
@@ -58,14 +58,14 @@ public class Skin {
             throw new IOException("Failed to load fallback font file");
         }
 
-        DefaultFont = ExtendedGame.LoadSpriteFont("Fonts/Default", fontSize, true);
+        DefaultFont = extendedGame.LoadSpriteFont("Fonts/Default", fontSize, true);
 
         if (DefaultFont == null) {
             ExtendedGame.ResourceLog.LogWarning("Failed to load default font file, using fallback.");
             DefaultFont = FallbackFont;
         }
 
-        DefaultFontSmall = ExtendedGame.LoadSpriteFont("Fonts/Default", Configuration.ReadInt("FontSizeSmall", TAG, 20));
+        DefaultFontSmall = extendedGame.LoadSpriteFont("Fonts/Default", Configuration.ReadInt("FontSizeSmall", TAG, 20));
 
         if (DefaultFontSmall == null) {
             ExtendedGame.ResourceLog.LogWarning("Failed to load default font file, using fallback.");
@@ -86,7 +86,7 @@ public class Skin {
 
         string bgtex = Configuration.ReadString("SystemBackgroundImage", TAG);
         if (bgtex != null) {
-            BackgroundTexture = ExtendedGame.LoadTexture(bgtex);
+            BackgroundTexture = extendedGame.LoadTexture(bgtex);
         }
 
     }
