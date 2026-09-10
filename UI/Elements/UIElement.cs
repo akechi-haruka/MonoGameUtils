@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework.Graphics;
 namespace Haruka.MonoGameUtils.UI.Elements;
 
 public abstract class UIElement {
+    public String Id { get; set; }
     public Vector2 Position { get; set; }
 
     public int X {
@@ -18,11 +19,9 @@ public abstract class UIElement {
     }
 
     public Rectangle Rectangle {
-        get {
-            return new Rectangle(X, Y, Width, Height);
-        }
+        get { return new Rectangle(X, Y, Width, Height); }
     }
-    
+
     public int Width { get; set; }
     public int Height { get; set; }
 

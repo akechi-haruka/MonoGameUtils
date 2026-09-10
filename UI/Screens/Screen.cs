@@ -45,7 +45,10 @@ public abstract class Screen {
     }
 
     internal void OpenScreen(Screen prev) {
-        PreviousScreen = prev;
+        if (PreviousScreen == null) {
+            PreviousScreen = prev;
+        }
+
         ResetScreenElements();
         OnScreenOpened();
     }
@@ -54,9 +57,11 @@ public abstract class Screen {
         OnScreenClosed();
     }
 
-    protected virtual void OnScreenOpened() { }
+    protected virtual void OnScreenOpened() {
+    }
 
-    protected virtual void OnScreenClosed() { }
+    protected virtual void OnScreenClosed() {
+    }
 
     public void Draw(GameTime gameTime, SpriteBatch spriteBatch) {
         foreach (UIElement e in elements.Where(e => e.Visible)) {
@@ -69,7 +74,6 @@ public abstract class Screen {
     protected abstract void DrawScreen(GameTime gameTime, SpriteBatch spriteBatch);
 
     public void Update(GameTime gameTime) {
-
         lock (elements) {
             for (int i = elements.Count - 1; i >= 0; i--) {
                 UIElement e = elements[i];
@@ -78,11 +82,13 @@ public abstract class Screen {
                 if (elements.Count != presize) {
                     Log.Main.LogError(e + " has changed visible elements on the screen!!");
                 }
+
                 if (e.DestroyWhenInvisible && !e.Visible) {
                     elements.RemoveAt(i);
                 }
+
                 if (e is ITouchable it) {
-                    if (Game.InputManager.IsJustClickReleased(e, it.ShouldDoOriginCheck())){
+                    if (Game.InputManager.IsJustClickReleased(e, it.ShouldDoOriginCheck())) {
                         it.OnTouch(Game.InputManager.GetTouchX(), Game.InputManager.GetTouchY());
                     }
                 }
@@ -108,6 +114,7 @@ public abstract class Screen {
                 elements.Add(e);
             }
         }
+
         return e;
     }
 
@@ -115,6 +122,7 @@ public abstract class Screen {
         lock (elements) {
             elements.Remove(e);
         }
+
         return e;
     }
 
@@ -129,7 +137,6 @@ public abstract class Screen {
     }
 
     public virtual void OnCreateScreenElements() {
-
     }
 
     public virtual void OnKeyboardTypeEvent(TextInputEventArgs e) {
@@ -153,12 +160,19 @@ public abstract class Screen {
                 }
             }
         }
+
         return el;
     }
 
     public UIElement[] GetElements() {
         lock (elements) {
             return elements.ToArray();
+        }
+    }
+
+    public UIElement GetElementWithId(String id) {
+        lock (elements) {
+            return elements.FirstOrDefault(e => e.Id == id);
         }
     }
 
@@ -170,17 +184,16 @@ public abstract class Screen {
                 }
             }
         }
+
         return default;
     }
 
     private void CheckUiThread() {
-
         if (!(Game.DrawScreen == null || Game.CurrentScreen.GetType() == typeof(LoadingScreen)) && Game.LogicThread != Thread.CurrentThread) {
             Log.Main.LogError("!!! ATTEMPTING TO ADD ELEMENT FROM NON-LOGIC THREAD OUTSIDE OF A LOADING SCREEN! THIS IS A HUGE CRASH RISK !!!");
             Log.Main.LogError("Current screen is: " + Game.CurrentScreen?.GetType());
             Log.Main.LogError("Current thread is: " + Thread.CurrentThread.Name + "\n" + new StackTrace());
         }
-
     }
 
     internal void ResetScreenElements() {
@@ -192,5 +205,6 @@ public abstract class Screen {
 }
 
 public enum UiElementSearchOrder {
-    First, Topmost
+    First,
+    Topmost
 }
