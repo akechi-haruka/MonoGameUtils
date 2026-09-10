@@ -1,4 +1,5 @@
 ﻿using Haruka.MonoGameUtils.UI.Elements;
+using Haruka.MonoGameUtils.UI.Graphics.Animators;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -26,7 +27,9 @@ public class LoadingScreen<T> : Screen {
     }
 
     public override void OnCreateScreenElements() {
-        AddElement(new ElementText(text, Game.Width / 2, Game.Height / 2, CenterFlags.CenterX | CenterFlags.CenterY));
+        ElementText el = new ElementText(text, Game.Width / 2, Game.Height / 2, CenterFlags.CenterX | CenterFlags.CenterY);
+        el.AddAnimator(new FlashAnimator(el, 1000));
+        AddElement(el);
     }
 
     private void RunDelegate() {
@@ -66,7 +69,9 @@ public class LoadingScreen : Screen {
     }
 
     public override void OnCreateScreenElements() {
-        AddElement(new ElementText(text, Game.Width / 2, Game.Height / 2, CenterFlags.CenterX | CenterFlags.CenterY));
+        ElementText el = new ElementText(text, Game.Width / 2, Game.Height / 2, CenterFlags.CenterX | CenterFlags.CenterY);
+        el.AddAnimator(new FlashAnimator(el, 1000));
+        AddElement(el);
     }
 
     private void RunDelegate() {
