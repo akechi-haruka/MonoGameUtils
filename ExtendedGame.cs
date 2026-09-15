@@ -394,14 +394,13 @@ public abstract class ExtendedGame : Game {
     private void Window_ClientSizeChanged(object sender, EventArgs e) {
         int w = Window.ClientBounds.Width;
         int h = Window.ClientBounds.Height;
-        
+
         Log.Main.LogInformation("Window resized to " + w + "x" + h);
         SetRenderSize(w, h);
         if (dynamicResize) {
             RecreateRenderPositions();
             ApplyWindowChanges();
         }
-
     }
 
     private void UpdateAnchors() {
@@ -524,8 +523,9 @@ public abstract class ExtendedGame : Game {
         } finally {
             spriteBatch.End();
         }
+
         GraphicsDevice.SetRenderTarget(null);
-        
+
         spriteBatch.Begin();
         spriteBatch.Draw(renderTarget, renderRectangle, null, Color.White);
         spriteBatch.End();
@@ -622,6 +622,10 @@ public abstract class ExtendedGame : Game {
 
         Overlay?.AddElement(dlg);
         InputManager.ResetInputStates();
+    }
+
+    public bool HasDialog() {
+        return Overlay?.GetElement<Dialog>() != null;
     }
 
     public void OpenTextInput(string title, string @default, Action<string> callback, bool allowCancel = true) {

@@ -6,23 +6,21 @@ using Microsoft.Xna.Framework;
 namespace Haruka.MonoGameUtils.UI.Elements;
 
 public class Dialog : ElementRectangle {
-    
     private readonly List<ElementText> options = new List<ElementText>();
     private int selection;
 
     public Dialog(string message, string[] options = null, int width = 700, int height = 500, bool centerText = false) : base(ExtendedGame.Instance.Width / 2 - width / 2, ExtendedGame.Instance.Height / 2 - height / 2, width, height, ExtendedGame.Instance.Skin.SystemBackgroundColor, true) {
-        
         Children.Add(new ElementRectangle(X, Y, width, height, Game.Skin.SystemBorderColor) {
             BorderSize = Game.Skin.DialogBorderSize
         });
-        
+
         int messageHeight = options != null ? RenderUtils.CalculateTextLines(height, Game.Skin.DefaultFontHeight) - options.Length - 1 : height;
         Children.Add(new ElementText(RenderUtils.WrapText(Game.Skin.DefaultFont, message, width, messageHeight), X + Game.Skin.DialogBorderSize + (centerText ? Width / 2 : 0), Y + Game.Skin.DialogBorderSize, centerText ? CenterFlags.CenterY : CenterFlags.NoCenter));
-        
+
         if (options != null) {
             for (int i = options.Length - 1; i >= 0; i--) {
                 string option = options[i];
-                ElementText row = new ElementText(RenderUtils.WrapText(Game.Skin.DefaultFont, option, width, 1), X + Game.Skin.DialogBorderSize, Y + Game.Skin.DialogBorderSize + height - (Game.Skin.DefaultFontHeight * (i + 1)));
+                ElementText row = new ElementText(RenderUtils.WrapText(Game.Skin.DefaultFont, option, width, 1), Screen.MiddleCenter.X, Y + Game.Skin.DialogBorderSize + height - (Game.Skin.DefaultFontHeight * (i + 1)), CenterFlags.CenterX);
                 Children.Add(row);
                 this.options.Add(row);
             }
@@ -49,13 +47,13 @@ public class Dialog : ElementRectangle {
         }
 
         if (UserClosable) {
-            if (inputManager.IsAnyJustPressed(Inputs.TEST)) {
+            if (inputManager.IsAnyJustPressed(Inputs.TEST, Inputs.ENTER)) {
                 Close(selection);
             }
 
             if (options != null) {
                 if (options.Count > 0) {
-                    if (inputManager.IsAnyJustPressed(Inputs.SERVICE)) {
+                    if (inputManager.IsAnyJustPressed(Inputs.SERVICE, Inputs.DOWN)) {
                         selection--;
                         if (selection < 0) {
                             selection = options.Count - 1;
@@ -101,5 +99,7 @@ public class Dialog : ElementRectangle {
         Open = false;
         Result = result;
         OnClose?.Invoke(result);
+        Game.QueueOnLogicThread(() => Game.Overlay?.RemoveElement(this));
+        Game.InputManager.SkipInputFrame();
     }
 }
