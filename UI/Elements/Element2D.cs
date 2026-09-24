@@ -7,12 +7,12 @@ using Microsoft.Xna.Framework.Graphics;
 namespace Haruka.MonoGameUtils.UI.Elements;
 
 public class Element2D : UIElement, IColorable {
-
     public static readonly float ROTATION_CONST = MathHelper.ToRadians(360);
 
     public Texture2D Texture { get; set; }
     public float Rotation { get; set; }
     public Color Tint { get; set; } = Color.White;
+
     public Color Color {
         get { return Tint; }
         set { Tint = value; }
@@ -34,7 +34,15 @@ public class Element2D : UIElement, IColorable {
     }
 
     protected override void DrawElement(GameTime gameTime, SpriteBatch spriteBatch) {
-        spriteBatch.Draw(Texture ?? Game.Skin.NoTexture, Rectangle, null, Tint, Rotation, new Vector2((CenterFlags & CenterFlags.CenterX) != 0 ? Width / 2F : 0, (CenterFlags & CenterFlags.CenterY) != 0 ? Height / 2F : 0), SpriteEffects.None, 0);
+        Texture2D tex = Texture ?? Game.Skin.NoTexture;
+        spriteBatch.Draw(tex,
+            Rectangle,
+            null,
+            Tint,
+            Rotation,
+            new Vector2((CenterFlags & CenterFlags.CenterX) != 0 ? tex.Width / 2F : 0, (CenterFlags & CenterFlags.CenterY) != 0 ? tex.Height / 2F : 0),
+            SpriteEffects.None,
+            0);
     }
 
     protected override void UpdateElement(ExtendedGame game, InputManager inputManager, Screen screen, GameTime gameTime) {
